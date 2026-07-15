@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
-    <string name="menu_jugadores">Jugadores</string>
+    <string name="menu_home">Partidas</string>
+    <string name="menu_players">Jugadores</string>
+    <string name="menu_games">Juegos</string>
     <string name="filtros">Filtros</string>
 </resources>
