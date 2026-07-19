@@ -8,8 +8,9 @@ import androidx.room.TypeConverters
 
 import com.example.myapplication.ui.player.Player
 import com.example.myapplication.ui.player.PlayerDao
+import com.example.myapplication.ui.player.PlayerRating
 
-@Database(entities = [Game::class, Player::class, Match::class, MatchTeam::class, MatchPlayer::class], version = 4, exportSchema = false)
+@Database(entities = [Game::class, Player::class, Match::class, MatchTeam::class, MatchPlayer::class, PlayerRating::class, AttributeRating::class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao

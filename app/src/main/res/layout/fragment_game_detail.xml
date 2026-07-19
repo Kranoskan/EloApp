@@ -68,10 +68,23 @@
             android:background="@drawable/bg_board_game_token"
             android:paddingHorizontal="20dp"
             android:paddingVertical="10dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="12dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"/>
+
+        <TextView
+            android:id="@+id/tvTotalMatchesDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Partidas: 0"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_main_light"
+            android:background="@drawable/bg_board_game_token"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp"
+            android:layout_marginBottom="24dp"/>
 
         <!-- Sección: Turnos -->
         <LinearLayout

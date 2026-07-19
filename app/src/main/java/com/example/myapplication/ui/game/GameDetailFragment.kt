@@ -26,6 +26,7 @@ class GameDetailFragment : Fragment() {
     private lateinit var tvTitle: TextView
     private lateinit var ivImage: ImageView
     private lateinit var tvMaxPlayers: TextView
+    private lateinit var tvTotalMatches: TextView
     private lateinit var llTurnsContainer: LinearLayout
     private lateinit var tvTurnsHeader: TextView
     private lateinit var llTeamsContainer: LinearLayout
@@ -66,6 +67,7 @@ class GameDetailFragment : Fragment() {
         tvTitle = view.findViewById(R.id.tvGameTitleDetail)
         ivImage = view.findViewById(R.id.ivGameDetailImage)
         tvMaxPlayers = view.findViewById(R.id.tvMaxPlayersDetail)
+        tvTotalMatches = view.findViewById(R.id.tvTotalMatchesDetail)
         llTurnsContainer = view.findViewById(R.id.llTurnsContainer)
         tvTurnsHeader = view.findViewById(R.id.tvTurnsHeader)
         llTeamsContainer = view.findViewById(R.id.llTeamsContainer)
@@ -74,9 +76,20 @@ class GameDetailFragment : Fragment() {
         tvRulesHeader = view.findViewById(R.id.tvRulesHeader)
 
         setupListeners()
-        renderGameData(currentGame)
+        
+        viewModel.getAttributesForGame(currentGame.id).observe(viewLifecycleOwner) { ratings ->
+            renderGameData(currentGame, ratings)
+        }
+
+        observeMatchCount()
 
         return view
+    }
+
+    private fun observeMatchCount() {
+        viewModel.getMatchCountForGame(currentGame.id).observe(viewLifecycleOwner) { count ->
+            tvTotalMatches.text = "Total Partidas: $count"
+        }
     }
 
     private fun setupListeners() {
@@ -109,7 +122,7 @@ class GameDetailFragment : Fragment() {
         }
     }
 
-    private fun renderGameData(game: Game) {
+    private fun renderGameData(game: Game, attributeRatings: List<AttributeRating> = emptyList()) {
         tvTitle.text = game.name
 
         if (game.imageUri != null) {
@@ -132,7 +145,9 @@ class GameDetailFragment : Fragment() {
         tvTurnsHeader.visibility = View.VISIBLE
         if (lastTurn > 0) {
             for (i in 1..lastTurn) {
-                addInfoItem(llTurnsContainer, "Turno $i", "🎲", isDeletable = false) {}
+                val turnName = "Turno $i"
+                val rating = attributeRatings.find { it.type == "TURN" && it.name == turnName }?.strength ?: 0.0
+                addInfoItem(llTurnsContainer, turnName, "🎲", isDeletable = false, strength = rating) {}
             }
         } else {
             addPlaceholderItem(llTurnsContainer, "Sin límites de turnos especificados.")
@@ -143,7 +158,8 @@ class GameDetailFragment : Fragment() {
         val teams = game.teams ?: emptyList()
         if (teams.isNotEmpty()) {
             teams.forEach { teamName ->
-                addInfoItem(llTeamsContainer, teamName, "👥", isDeletable = true) {
+                val rating = attributeRatings.find { it.type == "TEAM" && it.name == teamName }?.strength ?: 0.0
+                addInfoItem(llTeamsContainer, teamName, "👥", isDeletable = true, strength = rating) {
                     val updatedTeams = teams.toMutableList().apply { remove(teamName) }
                     updateAndRefresh(currentGame.copy(teams = if (updatedTeams.isEmpty()) null else updatedTeams))
                 }
@@ -157,7 +173,8 @@ class GameDetailFragment : Fragment() {
         val rules = game.specialRules ?: emptyList()
         if (rules.isNotEmpty()) {
             rules.forEach { rule ->
-                addInfoItem(llRulesContainer, rule, "📜", isDeletable = true) {
+                val rating = attributeRatings.find { it.type == "RULE" && it.name == rule }?.strength ?: 0.0
+                addInfoItem(llRulesContainer, rule, "📜", isDeletable = true, strength = rating) {
                     val updatedRules = rules.toMutableList().apply { remove(rule) }
                     updateAndRefresh(currentGame.copy(specialRules = if (updatedRules.isEmpty()) null else updatedRules))
                 }
@@ -171,7 +188,9 @@ class GameDetailFragment : Fragment() {
     private fun updateAndRefresh(updatedGame: Game) {
         currentGame = updatedGame
         viewModel.updateGame(updatedGame)
-        renderGameData(updatedGame)
+        viewModel.getAttributesForGame(updatedGame.id).observe(viewLifecycleOwner) { ratings ->
+            renderGameData(updatedGame, ratings)
+        }
         Toast.makeText(context, "Componentes actualizados en el tablero", Toast.LENGTH_SHORT).show()
     }
 
@@ -180,16 +199,24 @@ class GameDetailFragment : Fragment() {
         title: String,
         icon: String,
         isDeletable: Boolean,
+        strength: Double = 0.0,
         onDeleted: () -> Unit
     ) {
         val itemView = LayoutInflater.from(context).inflate(R.layout.item_detail_token, container, false)
 
         val tvIcon = itemView.findViewById<TextView>(R.id.tvTokenIcon)
         val tvName = itemView.findViewById<TextView>(R.id.tvTokenName)
+        val tvStat = itemView.findViewById<TextView>(R.id.tvTokenStat)
         val btnDelete = itemView.findViewById<TextView>(R.id.btnDeleteToken)
 
         tvIcon.text = icon
         tvName.text = title
+
+        // Mostrar fuerza del atributo (calculada o extraída del texto)
+        val extraStrength = extractStrength(title)
+        val totalStrength = strength + extraStrength
+        tvStat.text = "Fuerza ${totalStrength.toInt()}"
+        tvStat.visibility = View.VISIBLE
 
         if (isDeletable) {
             btnDelete.visibility = View.VISIBLE
@@ -268,5 +295,11 @@ class GameDetailFragment : Fragment() {
             typedArray.recycle()
         }
         container.addView(textView)
+    }
+
+    private fun extractStrength(text: String): Double {
+        val regex = Regex("""\(([+-]?\d+)\)""")
+        val match = regex.find(text)
+        return match?.groupValues?.get(1)?.toDouble() ?: 0.0
     }
 }

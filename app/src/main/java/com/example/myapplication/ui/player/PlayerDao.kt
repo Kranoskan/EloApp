@@ -13,4 +13,13 @@ interface PlayerDao {
 
     @Update
     suspend fun updatePlayer(player: Player)
+
+    @Query("SELECT * FROM player_ratings WHERE playerId = :playerId AND gameId = :gameId")
+    suspend fun getRating(playerId: String, gameId: String): PlayerRating?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRating(rating: PlayerRating)
+
+    @Query("SELECT * FROM player_ratings WHERE playerId = :playerId")
+    fun getRatingsForPlayer(playerId: String): Flow<List<PlayerRating>>
 }

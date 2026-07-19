@@ -27,6 +27,13 @@ interface MatchDao {
 
     @Query("SELECT * FROM match_players WHERE matchId = :matchId")
     suspend fun getPlayersForMatch(matchId: String): List<MatchPlayer>
+
+    @Query("SELECT COUNT(*) FROM matches WHERE gameId = :gameId")
+    fun getMatchCountForGame(gameId: String): Flow<Int>
+
+    @Transaction
+    @Query("SELECT * FROM matches WHERE id IN (SELECT matchId FROM match_players WHERE playerId = :playerId)")
+    fun getMatchesForPlayer(playerId: String): Flow<List<MatchWithGame>>
 }
 
 data class MatchWithGame(

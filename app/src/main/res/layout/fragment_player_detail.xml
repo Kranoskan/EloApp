@@ -37,12 +37,22 @@
             android:id="@+id/tvPlayerNameDetail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="8dp"
             android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
             tools:text="Nombre del Jugador"
             android:textAlignment="center"/>
+
+        <TextView
+            android:id="@+id/tvGlobalStrength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:textSize="18sp"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
+            tools:text="Fuerza Global Media: 1200"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEditPlayer"
@@ -50,8 +60,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="EDITAR JUGADOR"
+            android:layout_marginBottom="24dp"
             app:icon="@android:drawable/ic_menu_edit"
             app:cornerRadius="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Estadísticas por Juego"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="16dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPlayerGameStats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/item_player_game_stats"/>
 
     </LinearLayout>
 </ScrollView>

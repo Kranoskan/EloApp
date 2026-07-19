@@ -27,7 +27,7 @@ class HomeFragment : Fragment() {
         rvMatches = view.findViewById(R.id.rvMatches)
         fabAddMatch = view.findViewById(R.id.fabAddMatch)
         
-        matchAdapter = MatchAdapter(emptyList()) { match ->
+        matchAdapter = MatchAdapter { match ->
             navigateToDetail(match)
         }
         

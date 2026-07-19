@@ -13,7 +13,10 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import java.util.Locale
 
 class PlayerDetailFragment : Fragment() {
 
@@ -22,7 +25,10 @@ class PlayerDetailFragment : Fragment() {
 
     private lateinit var ivPlayer: ImageView
     private lateinit var tvPlayerName: TextView
+    private lateinit var tvGlobalStrength: TextView
     private lateinit var btnEdit: Button
+    private lateinit var rvStats: RecyclerView
+    private lateinit var statsAdapter: PlayerGameStatsAdapter
 
     private var selectedImageUri: Uri? = null
     private var ivDialogPreview: ImageView? = null
@@ -50,11 +56,34 @@ class PlayerDetailFragment : Fragment() {
         
         ivPlayer = view.findViewById(R.id.ivPlayerDetail)
         tvPlayerName = view.findViewById(R.id.tvPlayerNameDetail)
+        tvGlobalStrength = view.findViewById(R.id.tvGlobalStrength)
         btnEdit = view.findViewById(R.id.btnEditPlayer)
+        rvStats = view.findViewById(R.id.rvPlayerGameStats)
 
+        setupRecyclerView()
         setupUI()
+        observeStats()
 
         return view
+    }
+
+    private fun setupRecyclerView() {
+        statsAdapter = PlayerGameStatsAdapter()
+        rvStats.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = statsAdapter
+        }
+    }
+
+    private fun observeStats() {
+        player?.let { p ->
+            viewModel.getPlayerStats(p.id).observe(viewLifecycleOwner) { stats ->
+                statsAdapter.submitList(stats)
+            }
+            viewModel.getGlobalAverageStrength(p.id).observe(viewLifecycleOwner) { avg ->
+                tvGlobalStrength.text = String.format(Locale.getDefault(), "Fuerza Global Media: %.0f", avg)
+            }
+        }
     }
 
     private fun setupUI() {
