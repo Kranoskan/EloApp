@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="?attr/colorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Cabecera de la carta: Icono del Meeple y Nombre del Jugador -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+
+            <!-- Icono reconocible (Deberás añadir un vector de meeple en drawables) -->
+            <ImageView
+                android:id="@+id/img_meeple_type"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_meeple"
+                app:tint="@color/meeple_red_light" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/img_meeple_type"
+                android:layout_marginStart="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jugador 1 (Agresivo)"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ventaja inicial: +2 Recursos"
+                    android:textSize="12sp"
+                    android:textColor="?attr/colorSecondary"/>
+            </LinearLayout>
+
+            <!-- Nivel de Winrate / Competitividad en forma de "Moneda" o "Puntos de Victoria" -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/bg_board_game_token"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:text="WR: 65%"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"/>
+        </RelativeLayout>
+
+        <!-- Sección de Datos Oculta bajo una barra visual (Evita el efecto Excel) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nivel de Ventaja en Early Game:"
+            android:textSize="12sp"/>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:progress="75"
+            app:trackThickness="8dp"
+            app:trackCornerRadius="4dp"
+            app:indicatorColor="@color/meeple_green_light"/>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

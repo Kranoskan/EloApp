@@ -24,12 +24,6 @@
             android:textStyle="bold"
             android:textColor="@color/black"/>
 
-        <TextView
-            android:id="@+id/tvMatchDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="Hace 2 días"
-            android:textSize="14sp"
-            android:textColor="@color/black"/>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

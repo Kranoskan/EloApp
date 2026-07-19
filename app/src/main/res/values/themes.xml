@@ -1,11 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.MyApplication" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <item name="android:statusBarColor" tools:targetApi="21">?attr/colorPrimaryVariant</item>
+    <style name="Theme.MeepleForce" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Colores Principales -->
+        <item name="colorPrimary">@color/meeple_blue_light</item>
+        <item name="colorSecondary">@color/meeple_green_light</item>
+        <item name="android:windowBackground">@color/wood_light</item>
+
+        <!-- Superficies de cartas y componentes -->
+        <item name="colorSurface">@color/card_bg_light</item>
+        <item name="colorOnSurface">@color/text_main_light</item>
+
+        <!-- Bordes y personalización de Material Cards por defecto -->
+        <item name="cardViewStyle">@style/Widget.MeepleForce.CardView</item>
+    </style>
+
+    <!-- Estilo propio para que las cartas parezcan cartas de juego reales -->
+    <style name="Widget.MeepleForce.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/card_bg_light</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">16dp</item> <!-- Esquinas muy redondeadas tipo carta -->
     </style>
 </resources>

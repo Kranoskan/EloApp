@@ -19,7 +19,7 @@
         <View
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@color/purple_500"/>
+            android:background="?attr/colorPrimary"/>
 
         <TextView
             android:id="@+id/tvGameTitle"
@@ -29,6 +29,6 @@
             tools:text="Catan"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black"/>
+            android:textColor="?attr/colorOnSurface"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

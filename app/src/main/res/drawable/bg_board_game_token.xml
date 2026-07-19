@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Este archivo simula el recuadro interno de un tablero o el borde de una loseta -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Un fondo sutil para contrastar con la carta -->
+    <solid android:color="?attr/colorSurfaceVariant" />
+
+    <!-- Bordes redondeados pero no tanto como la carta exterior -->
+    <corners android:radius="8dp" />
+
+    <!-- Línea exterior fina, simulando el corte del cartón -->
+    <stroke
+        android:width="2dp"
+        android:color="?attr/colorPrimary" />
+</shape>

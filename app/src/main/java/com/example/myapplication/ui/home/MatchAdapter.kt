@@ -26,11 +26,9 @@ class MatchAdapter(
 
 class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val tvMatchGame: TextView = view.findViewById(R.id.tvMatchGame)
-    private val tvMatchDate: TextView = view.findViewById(R.id.tvMatchDate)
 
     fun render(match: String, onItemSelected: (String) -> Unit) {
         tvMatchGame.text = match
-        tvMatchDate.text = ""
         itemView.setOnClickListener { onItemSelected(match) }
     }
 }

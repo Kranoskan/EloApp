@@ -1,10 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Colores base para simular tableros y madera -->
+    <color name="wood_light">#F5EBE0</color>
+    <color name="wood_dark">#1E1B18</color>
+
+    <!-- Colores de los Meeples (Modo Claro) -->
+    <color name="meeple_blue_light">#3A86C8</color>
+    <color name="meeple_red_light">#E63946</color>
+    <color name="meeple_green_light">#2A9D8F</color>
+    <color name="meeple_yellow_light">#E9C46A</color>
+
+    <!-- Colores de los Meeples (Modo Oscuro) -->
+    <color name="meeple_blue_dark">#5ADEFF</color>
+    <color name="meeple_red_dark">#FF6B6B</color>
+    <color name="meeple_green_dark">#4EFCB1</color>
+    <color name="meeple_yellow_dark">#FFE066</color>
+
+    <!-- Superficies de las cartas -->
+    <color name="card_bg_light">#FFFFFF</color>
+    <color name="card_bg_dark">#2D2824</color>
+
+    <!-- Textos -->
+    <color name="text_main_light">#332C26</color>
+    <color name="text_main_dark">#F4F1DE</color>
+
+    <!-- Colores estándar de Android -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
 </resources>

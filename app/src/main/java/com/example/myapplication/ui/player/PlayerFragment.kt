@@ -8,21 +8,15 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
-import com.example.myapplication.data.model.PlayerCategory
 
 class PlayerFragment : Fragment() {
-    private val categories = listOf(
-        PlayerCategory.Juego,
-        PlayerCategory.Elo,
-        PlayerCategory.Partidas
-    )
+
 
     private val players = listOf("Ismael", "Juan", "Maria", "Pedro", "Lucia")
 
     private lateinit var rvPlayerCategories: RecyclerView
     private lateinit var rvPlayers: RecyclerView
-    
-    private lateinit var categoryAdapter: PlayerCategoryAdapter
+
     private lateinit var playerAdapter: PlayerAdapter
 
     override fun onCreateView(
@@ -41,9 +35,6 @@ class PlayerFragment : Fragment() {
     }
     
     private fun initUI() {
-        categoryAdapter = PlayerCategoryAdapter(categories)
-        rvPlayerCategories.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        rvPlayerCategories.adapter = categoryAdapter
 
         playerAdapter = PlayerAdapter(players) { playerName ->
             navigateToDetail(playerName)

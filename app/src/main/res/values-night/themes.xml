@@ -1,0 +1,20 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.MeepleForce" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Colores Principales en Modo Oscuro -->
+        <item name="colorPrimary">@color/meeple_blue_dark</item>
+        <item name="colorSecondary">@color/meeple_green_dark</item>
+        <item name="android:windowBackground">@color/wood_dark</item>
+
+        <!-- Superficies oscuras -->
+        <item name="colorSurface">@color/card_bg_dark</item>
+        <item name="colorOnSurface">@color/text_main_dark</item>
+
+        <item name="cardViewStyle">@style/Widget.MeepleForce.CardView</item>
+    </style>
+
+    <style name="Widget.MeepleForce.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/card_bg_dark</item>
+        <item name="cardElevation">2dp</item> <!-- Menos elevación (sombra) en modo oscuro -->
+        <item name="cardCornerRadius">16dp</item>
+    </style>
+</resources>
