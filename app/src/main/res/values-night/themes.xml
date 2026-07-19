@@ -2,12 +2,21 @@
     <style name="Theme.MeepleForce" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Colores Principales en Modo Oscuro -->
         <item name="colorPrimary">@color/meeple_blue_dark</item>
+        <item name="colorOnPrimary">@color/black</item>
         <item name="colorSecondary">@color/meeple_green_dark</item>
+        <item name="colorOnSecondary">@color/black</item>
+
         <item name="android:windowBackground">@color/wood_dark</item>
 
         <!-- Superficies oscuras -->
         <item name="colorSurface">@color/card_bg_dark</item>
         <item name="colorOnSurface">@color/text_main_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary_dark</item>
+
+        <!-- Forzar colores de texto primarios y secundarios -->
+        <item name="android:textColorPrimary">@color/text_main_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
 
         <item name="cardViewStyle">@style/Widget.MeepleForce.CardView</item>
     </style>

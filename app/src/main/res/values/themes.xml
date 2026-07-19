@@ -2,12 +2,21 @@
     <style name="Theme.MeepleForce" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Colores Principales -->
         <item name="colorPrimary">@color/meeple_blue_light</item>
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/meeple_green_light</item>
+        <item name="colorOnSecondary">@color/white</item>
+
         <item name="android:windowBackground">@color/wood_light</item>
 
         <!-- Superficies de cartas y componentes -->
         <item name="colorSurface">@color/card_bg_light</item>
         <item name="colorOnSurface">@color/text_main_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary_light</item>
+
+        <!-- Colores de texto primarios y secundarios -->
+        <item name="android:textColorPrimary">@color/text_main_light</item>
+        <item name="android:textColorSecondary">@color/text_secondary_light</item>
 
         <!-- Bordes y personalización de Material Cards por defecto -->
         <item name="cardViewStyle">@style/Widget.MeepleForce.CardView</item>
