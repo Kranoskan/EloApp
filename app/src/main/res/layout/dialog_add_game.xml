@@ -188,7 +188,7 @@
                 style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="CREAR COMPONENTES"
+                android:text="GUARDAR JUEGO"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:cornerRadius="16dp"/>
