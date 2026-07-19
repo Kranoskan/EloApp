@@ -3,4 +3,5 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kandroid) apply false
     alias(libs.plugins.kparcelize) apply false
+    alias(libs.plugins.androidx.room) apply false
 }

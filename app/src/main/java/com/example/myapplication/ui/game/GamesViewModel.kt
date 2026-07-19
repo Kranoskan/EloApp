@@ -1,15 +1,28 @@
 package com.example.myapplication.ui.game
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
-class GamesViewModel : ViewModel() {
-    private val _games = MutableLiveData<List<Game>>(emptyList())
-    val games: LiveData<List<Game>> = _games
+// Cambiamos a AndroidViewModel para tener acceso al contexto de la aplicación para Room
+class GamesViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val gameDao = AppDatabase.getDatabase(application).gameDao()
+
+    // Convierte el Flow de la base de datos directamente a LiveData para la UI[cite: 11]
+    val games = gameDao.getAllGames().asLiveData()
 
     fun addGame(game: Game) {
-        val currentList = _games.value ?: emptyList()
-        _games.value = currentList + game
+        viewModelScope.launch {
+            gameDao.insertGame(game)
+        }
+    }
+
+    fun updateGame(game: Game) {
+        viewModelScope.launch {
+            gameDao.updateGame(game)
+        }
     }
 }

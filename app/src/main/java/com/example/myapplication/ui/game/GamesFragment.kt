@@ -12,7 +12,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
@@ -20,11 +20,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputLayout
 
 class GamesFragment : Fragment() {
-    private val viewModel: GamesViewModel by viewModels()
+    // CAMBIO CLAVE: Compartir el ciclo de vida con la Activity para evitar fugas de datos al navegar
+    private val viewModel: GamesViewModel by activityViewModels()
+
     private lateinit var rvGames: RecyclerView
     private lateinit var gameAdapter: GameAdapter
     private lateinit var fabAddGame: FloatingActionButton
-    
+
     private var selectedImageUri: Uri? = null
     private var ivDialogPreview: ImageView? = null
 
@@ -43,14 +45,14 @@ class GamesFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_games, container, false)
         rvGames = view.findViewById(R.id.rvGames)
         fabAddGame = view.findViewById(R.id.fabAddGame)
-        
+
         gameAdapter = GameAdapter(emptyList()) { game ->
             navigateToDetail(game)
         }
-        
+
         rvGames.layoutManager = LinearLayoutManager(context)
         rvGames.adapter = gameAdapter
-        
+
         viewModel.games.observe(viewLifecycleOwner) { games ->
             gameAdapter.updateList(games)
         }
@@ -58,7 +60,7 @@ class GamesFragment : Fragment() {
         fabAddGame.setOnClickListener {
             showAddGameDialog()
         }
-        
+
         return view
     }
 
