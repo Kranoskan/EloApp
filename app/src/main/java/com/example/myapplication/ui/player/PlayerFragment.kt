@@ -12,7 +12,7 @@ import com.example.myapplication.R
 class PlayerFragment : Fragment() {
 
 
-    private val players = listOf("Ismael", "Juan", "Maria", "Pedro", "Lucia")
+    private val players = listOf<String>()
 
     private lateinit var rvPlayerCategories: RecyclerView
     private lateinit var rvPlayers: RecyclerView

@@ -3,36 +3,48 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="?attr/android:windowBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <!-- Título principal estilo caja de juego -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginVertical="32dp"
-            android:text="JUEGOS"
-            android:textColor="@color/black"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:layout_marginVertical="24dp"
+            android:text="BIBLIOTECA"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.2" />
 
+        <!-- Lista adaptada para contener cartas de juego con espacio -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvGames"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:paddingHorizontal="12dp"
+            android:paddingBottom="80dp"
+            android:clipToPadding="false"
+            android:scrollbars="none"/>
 
     </LinearLayout>
 
+    <!-- Botón flotante estilizado como un Token de acción -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddGame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        android:layout_margin="20dp"
+        app:srcCompat="@android:drawable/ic_input_add"
+        app:backgroundTint="?attr/colorPrimary"
+        app:tint="?attr/colorOnPrimary"
+        app:elevation="8dp"
+        app:fabCustomSize="64dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

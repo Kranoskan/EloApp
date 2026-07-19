@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 
 class HomeFragment : Fragment() {
-    private val matches = listOf("Ajedrez", "Catan", "Monopoly", "Risk", "Dixit")
+    private val matches = listOf<String>()
     private lateinit var rvMatches: RecyclerView
     private lateinit var matchAdapter: MatchAdapter
 

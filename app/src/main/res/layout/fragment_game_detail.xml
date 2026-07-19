@@ -1,19 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/white">
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
-    <TextView
-        android:id="@+id/tvGameTitleDetail"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Título del Juego"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"/>
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="?attr/android:windowBackground"
+        android:gravity="center_horizontal">
 
+        <!-- Imagen tipo Token/Loseta circular de Juego -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            app:cardCornerRadius="80dp"
+            app:cardElevation="10dp"
+            app:strokeWidth="3dp"
+            app:strokeColor="?attr/colorSecondary"
+            android:layout_marginBottom="20dp">
 
-</LinearLayout>
+            <ImageView
+                android:id="@+id/ivGameDetailImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_meeple"
+                app:tint="?attr/colorPrimary"
+                app:tintMode="multiply"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/tvGameTitleDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Título del Juego"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="12dp"
+            android:textAlignment="center"
+            android:letterSpacing="0.02"/>
+
+        <!-- Distintivo/Token de jugadores -->
+        <TextView
+            android:id="@+id/tvMaxPlayersDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Máx. Jugadores: Sin especificar"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_main_light"
+            android:background="@drawable/bg_board_game_token"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Sección: Turnos -->
+        <LinearLayout
+            android:id="@+id/llTurnsWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvTurnsHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚔️ Fases y Turnos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="6dp"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/llTurnsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <!-- Sección: Equipos -->
+        <LinearLayout
+            android:id="@+id/llTeamsWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvTeamsHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="👥 Facciones / Equipos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="6dp"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/llTeamsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <!-- Sección: Reglas Especiales -->
+        <LinearLayout
+            android:id="@+id/llRulesWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvRulesHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📜 Modificadores de Reglas"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="6dp"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/llRulesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
