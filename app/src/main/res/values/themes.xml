@@ -28,4 +28,8 @@
         <item name="cardElevation">4dp</item>
         <item name="cardCornerRadius">16dp</item> <!-- Esquinas muy redondeadas tipo carta -->
     </style>
+
+    <style name="ThemeOverlay.MeepleForce.Toolbar" parent="ThemeOverlay.Material3.ActionBar">
+        <item name="colorControlNormal">?attr/colorOnPrimary</item>
+    </style>
 </resources>

@@ -1,7 +1,10 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Meeple Force</string>
     <string name="menu_home">Partidas</string>
     <string name="menu_players">Jugadores</string>
     <string name="menu_games">Juegos</string>
     <string name="filtros">Filtros</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_upload">Subir a la nube</string>
+    <string name="action_download">Cargar datos</string>
 </resources>

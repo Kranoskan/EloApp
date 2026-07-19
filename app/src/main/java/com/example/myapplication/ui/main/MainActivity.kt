@@ -3,16 +3,47 @@ package com.example.myapplication.ui.main
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import android.content.Intent
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.myapplication.R
 import com.example.myapplication.ui.home.HomeFragment
 import com.example.myapplication.ui.player.PlayerFragment
 import com.example.myapplication.ui.game.GamesFragment
+import com.example.myapplication.ui.game.AppDatabase
+import com.example.myapplication.util.DriveServiceHelper
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.drive.Drive
+import com.google.api.services.drive.DriveScopes
+import java.io.File
+import java.util.Collections
 
 class MainActivity : AppCompatActivity() {
+
+    private var driveServiceHelper: DriveServiceHelper? = null
+
+    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            handleSignInResult(result.data)
+        } else {
+            Toast.makeText(this, "Sign in failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main)
+
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
@@ -33,6 +64,127 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+        
+        silentSignIn()
+    }
+
+    private fun silentSignIn() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
+            .build()
+
+        val client = GoogleSignIn.getClient(this, gso)
+        client.silentSignIn().addOnSuccessListener { googleAccount ->
+            handleSignInAccount(googleAccount)
+        }
+    }
+
+    private fun requestSignIn() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
+            .build()
+
+        val client = GoogleSignIn.getClient(this, gso)
+        googleSignInLauncher.launch(client.signInIntent)
+    }
+
+    private fun handleSignInResult(result: Intent?) {
+        GoogleSignIn.getSignedInAccountFromIntent(result)
+            .addOnSuccessListener { googleAccount ->
+                handleSignInAccount(googleAccount)
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun handleSignInAccount(googleAccount: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+        val credential = GoogleAccountCredential.usingOAuth2(
+            this, Collections.singleton(DriveScopes.DRIVE_APPDATA)
+        )
+        credential.selectedAccount = googleAccount.account
+
+        val googleDriveService = Drive.Builder(
+            NetHttpTransport(),
+            GsonFactory(),
+            credential
+        )
+            .setApplicationName("EloBoard")
+            .build()
+
+        driveServiceHelper = DriveServiceHelper(googleDriveService)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_upload -> {
+                uploadDatabase()
+                true
+            }
+            R.id.action_download -> {
+                downloadDatabase()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun uploadDatabase() {
+        if (driveServiceHelper == null) {
+            requestSignIn()
+            return
+        }
+
+        val dbFile = getDatabasePath("meepleforce_database")
+        if (dbFile.exists()) {
+            Thread {
+                val fileId = driveServiceHelper?.uploadFile(dbFile, "meepleforce_database.db")
+                runOnUiThread {
+                    if (fileId != null) {
+                        Toast.makeText(this, "Copia de seguridad subida con éxito", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Error al subir la copia de seguridad", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }.start()
+        }
+    }
+
+    private fun downloadDatabase() {
+        if (driveServiceHelper == null) {
+            requestSignIn()
+            return
+        }
+
+        val dbFile = getDatabasePath("meepleforce_database")
+        Thread {
+            // Close database before overwriting
+            AppDatabase.closeDatabase()
+            
+            // Delete journal files if they exist
+            val walFile = File(dbFile.path + "-wal")
+            val shmFile = File(dbFile.path + "-shm")
+            if (walFile.exists()) walFile.delete()
+            if (shmFile.exists()) shmFile.delete()
+
+            val success = driveServiceHelper?.downloadFile(dbFile, "meepleforce_database.db") ?: false
+            runOnUiThread {
+                if (success) {
+                    Toast.makeText(this, "Datos cargados con éxito. Reiniciando aplicación...", Toast.LENGTH_SHORT).show()
+                    // Restart app or reload data
+                    recreate()
+                } else {
+                    Toast.makeText(this, "Error al cargar los datos", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
     }
 
     private fun loadFragment(fragment: Fragment) {

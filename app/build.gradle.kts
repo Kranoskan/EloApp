@@ -38,6 +38,13 @@ android {
     kotlinOptions {
         jvmTarget = "21"
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -59,4 +66,10 @@ dependencies {
 
     // Cambiado aquí: usando una cadena explícita para evitar problemas de referencia no resuelta
     "kapt"(libs.room.compiler)
+
+    // Google Drive API
+    implementation(libs.google.play.auth)
+    implementation(libs.google.api.client)
+    implementation(libs.google.api.drive)
+    implementation(libs.google.http.gson)
 }
