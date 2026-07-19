@@ -127,7 +127,7 @@
                 android:id="@+id/tvTeamsHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="👥 Facciones / Equipos ➕"
+                android:text="👥 Equipos ➕"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorPrimary"

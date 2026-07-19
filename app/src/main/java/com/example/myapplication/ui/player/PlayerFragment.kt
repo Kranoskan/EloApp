@@ -12,7 +12,7 @@ import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -55,7 +55,7 @@ class PlayerFragment : Fragment() {
         playerAdapter = PlayerAdapter(emptyList()) { player ->
             navigateToDetail(player)
         }
-        rvPlayers.layoutManager = LinearLayoutManager(context)
+        rvPlayers.layoutManager = GridLayoutManager(context, 2)
         rvPlayers.adapter = playerAdapter
 
         viewModel.players.observe(viewLifecycleOwner) { playersList: List<Player> ->

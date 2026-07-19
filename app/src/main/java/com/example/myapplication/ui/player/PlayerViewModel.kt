@@ -8,7 +8,6 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.ui.game.AppDatabase
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 data class PlayerGameStats(
@@ -27,16 +26,33 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     fun getPlayerStats(playerId: String): LiveData<List<PlayerGameStats>> {
         return combine(
-            matchDao.getMatchesForPlayer(playerId),
+            matchDao.getMatchesWithDetailsForPlayer(playerId),
             playerDao.getRatingsForPlayer(playerId)
         ) { matches, ratings ->
-            matches.groupBy { it.game.id }.map { (gameId, matchWithGames) ->
+            matches.groupBy { it.game.id }.map { (gameId, matchDetailsList) ->
                 val rating = ratings.find { it.gameId == gameId }
+                
+                val wins = matchDetailsList.count { detail ->
+                    if (detail.match.isTeamGame) {
+                        val playerInMatch = detail.players.find { it.playerId == playerId }
+                        val playerTeam = detail.teams.find { it.teamName == playerInMatch?.teamName }
+                        val maxTeamScore = detail.teams.maxOfOrNull { it.score }
+                        playerTeam != null && maxTeamScore != null && playerTeam.score == maxTeamScore
+                    } else {
+                        val playerScore = detail.players.find { it.playerId == playerId }?.score
+                        val maxPlayerScore = detail.players.maxOfOrNull { it.score ?: Int.MIN_VALUE }
+                        playerScore != null && maxPlayerScore != null && playerScore == maxPlayerScore
+                    }
+                }
+                
+                val totalMatches = matchDetailsList.size
+                val winProb = if (totalMatches > 0) wins.toDouble() / totalMatches else 0.0
+
                 PlayerGameStats(
-                    gameName = matchWithGames.first().game.name,
-                    matchesPlayed = rating?.matchesPlayed ?: matchWithGames.size,
+                    gameName = matchDetailsList.first().game.name,
+                    matchesPlayed = rating?.matchesPlayed ?: totalMatches,
                     strength = rating?.strength?.toInt() ?: 1200,
-                    winProbability = 0.5 // TODO: Calculate this based on some average opponent?
+                    winProbability = winProb
                 )
             }
         }.asLiveData()

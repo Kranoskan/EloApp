@@ -168,7 +168,6 @@ class AddMatchFragment : Fragment() {
         val actvPlayerName = playerView.findViewById<AutoCompleteTextView>(R.id.actvPlayerName)
         val btnRemovePlayer = playerView.findViewById<ImageButton>(R.id.btnRemovePlayer)
         val etScore = playerView.findViewById<EditText>(R.id.etPlayerScore)
-        val actvPlayerRules = playerView.findViewById<AutoCompleteTextView>(R.id.actvPlayerRules)
 
         if (isInsideTeam) {
             playerView.findViewById<View>(R.id.tilPlayerScore)?.let { it.visibility = View.GONE }
@@ -178,15 +177,51 @@ class AddMatchFragment : Fragment() {
         val playerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, allPlayers.map { it.name })
         actvPlayerName.setAdapter(playerAdapter)
 
-        // Special Rules dropdown
-        selectedGame?.specialRules?.let { rules ->
-            val rulesAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, rules)
-            actvPlayerRules.setAdapter(rulesAdapter)
+        // Special Rules multi-select
+        val selectedPlayerRules = mutableListOf<String>()
+        playerView.tag = selectedPlayerRules
+        val btnSelectPlayerRules = playerView.findViewById<Button>(R.id.btnSelectPlayerRules)
+        val cgPlayerRules = playerView.findViewById<ChipGroup>(R.id.cgPlayerRules)
+
+        btnSelectPlayerRules.setOnClickListener {
+            val rules = selectedGame?.specialRules?.toTypedArray() ?: return@setOnClickListener
+            if (rules.isEmpty()) return@setOnClickListener
+
+            val checkedItems = rules.map { selectedPlayerRules.contains(it) }.toBooleanArray()
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Seleccionar Reglas/Roles")
+                .setMultiChoiceItems(rules, checkedItems) { _, which, isChecked ->
+                    if (isChecked) {
+                        selectedPlayerRules.add(rules[which])
+                    } else {
+                        selectedPlayerRules.remove(rules[which])
+                    }
+                }
+                .setPositiveButton("Aceptar") { _, _ ->
+                    updatePlayerRulesChips(cgPlayerRules, selectedPlayerRules)
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
         }
 
         btnRemovePlayer.setOnClickListener { container.removeView(playerView) }
 
         container.addView(playerView)
+    }
+
+    private fun updatePlayerRulesChips(chipGroup: ChipGroup, selectedRules: MutableList<String>) {
+        chipGroup.removeAllViews()
+        selectedRules.forEach { rule ->
+            val chip = Chip(requireContext())
+            chip.text = rule
+            chip.isCloseIconVisible = true
+            chip.setOnCloseIconClickListener {
+                selectedRules.remove(rule)
+                updatePlayerRulesChips(chipGroup, selectedRules)
+            }
+            chipGroup.addView(chip)
+        }
     }
 
     private fun saveMatch() {
@@ -222,14 +257,14 @@ class AddMatchFragment : Fragment() {
                     
                     if (player != null) {
                         val turn = playerView.findViewById<EditText>(R.id.etPlayerTurn).text.toString().toIntOrNull()
-                        val rules = playerView.findViewById<AutoCompleteTextView>(R.id.actvPlayerRules).text.toString()
+                        val rules = playerView.tag as? List<String>
                         
                         matchPlayers.add(MatchPlayer(
                             matchId = match.id,
                             playerId = player.id,
                             teamName = teamName,
                             turn = turn,
-                            playerRules = if (rules.isNotBlank()) listOf(rules) else null
+                            playerRules = if (!rules.isNullOrEmpty()) rules else null
                         ))
                     }
                 }
@@ -243,14 +278,14 @@ class AddMatchFragment : Fragment() {
                 if (player != null) {
                     val score = playerView.findViewById<EditText>(R.id.etPlayerScore).text.toString().toIntOrNull() ?: 0
                     val turn = playerView.findViewById<EditText>(R.id.etPlayerTurn).text.toString().toIntOrNull()
-                    val rules = playerView.findViewById<AutoCompleteTextView>(R.id.actvPlayerRules).text.toString()
+                    val rules = playerView.tag as? List<String>
                     
                     matchPlayers.add(MatchPlayer(
                         matchId = match.id,
                         playerId = player.id,
                         score = score,
                         turn = turn,
-                        playerRules = if (rules.isNotBlank()) listOf(rules) else null
+                        playerRules = if (!rules.isNullOrEmpty()) rules else null
                     ))
                 }
             }

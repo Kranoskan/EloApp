@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import java.util.Locale
@@ -70,7 +70,7 @@ class PlayerDetailFragment : Fragment() {
     private fun setupRecyclerView() {
         statsAdapter = PlayerGameStatsAdapter()
         rvStats.apply {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = GridLayoutManager(context, 2)
             adapter = statsAdapter
         }
     }

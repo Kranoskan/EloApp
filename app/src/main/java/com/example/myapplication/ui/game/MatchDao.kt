@@ -33,7 +33,7 @@ interface MatchDao {
 
     @Transaction
     @Query("SELECT * FROM matches WHERE id IN (SELECT matchId FROM match_players WHERE playerId = :playerId)")
-    fun getMatchesForPlayer(playerId: String): Flow<List<MatchWithGame>>
+    fun getMatchesWithDetailsForPlayer(playerId: String): Flow<List<MatchWithDetails>>
 }
 
 data class MatchWithGame(
@@ -47,6 +47,11 @@ data class MatchWithGame(
 
 data class MatchWithDetails(
     @Embedded val match: Match,
+    @Relation(
+        parentColumn = "gameId",
+        entityColumn = "id"
+    )
+    val game: Game,
     @Relation(
         parentColumn = "id",
         entityColumn = "matchId"

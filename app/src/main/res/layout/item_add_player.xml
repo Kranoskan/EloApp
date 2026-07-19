@@ -77,21 +77,24 @@
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            <Button
+                android:id="@+id/btnSelectPlayerRules"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="2"
                 android:layout_marginStart="8dp"
-                android:hint="Rol/Facción">
-
-                <AutoCompleteTextView
-                    android:id="@+id/actvPlayerRules"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                android:text="Reglas/Roles"
+                android:textAllCaps="false"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"/>
         </LinearLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cgPlayerRules"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"/>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
