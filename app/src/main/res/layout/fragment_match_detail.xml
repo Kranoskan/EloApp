@@ -49,5 +49,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
+        <Button
+            android:id="@+id/btnDeleteMatch"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ELIMINAR PARTIDA"
+            android:textColor="@color/meeple_red_light"
+            android:layout_marginTop="24dp"/>
+
     </LinearLayout>
 </ScrollView>

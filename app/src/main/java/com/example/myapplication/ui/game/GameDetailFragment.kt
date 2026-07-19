@@ -75,7 +75,7 @@ class GameDetailFragment : Fragment() {
         llRulesContainer = view.findViewById(R.id.llRulesContainer)
         tvRulesHeader = view.findViewById(R.id.tvRulesHeader)
 
-        setupListeners()
+        setupListeners(view)
         
         viewModel.getAttributesForGame(currentGame.id).observe(viewLifecycleOwner) { ratings ->
             renderGameData(currentGame, ratings)
@@ -92,7 +92,7 @@ class GameDetailFragment : Fragment() {
         }
     }
 
-    private fun setupListeners() {
+    private fun setupListeners(view: View) {
         // 1. Cambiar imagen al pulsar sobre ella
         ivImage.setOnClickListener {
             changeImageLauncher.launch("image/*")
@@ -119,6 +119,19 @@ class GameDetailFragment : Fragment() {
                 currentRules.add(newRule)
                 updateAndRefresh(currentGame.copy(specialRules = currentRules))
             }
+        }
+
+        // 5. Eliminar juego
+        view.findViewById<Button>(R.id.btnDeleteGame)?.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Eliminar Juego")
+                .setMessage("¿Estás seguro de que quieres eliminar '${currentGame.name}'? Esto borrará también todas sus partidas.")
+                .setPositiveButton("Eliminar") { _, _ ->
+                    viewModel.deleteGame(currentGame)
+                    parentFragmentManager.popBackStack()
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
         }
     }
 

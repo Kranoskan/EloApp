@@ -22,4 +22,10 @@ interface GameDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAttributeRating(rating: AttributeRating)
+
+    @Delete
+    suspend fun deleteGame(game: Game)
+
+    @Query("DELETE FROM attribute_ratings WHERE gameId = :gameId")
+    suspend fun deleteAttributesForGame(gameId: String)
 }

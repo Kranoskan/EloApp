@@ -1,9 +1,11 @@
 package com.example.myapplication.ui.home
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -50,6 +52,20 @@ class MatchDetailFragment : Fragment() {
         tvDate = view.findViewById(R.id.tvDetailDate)
         tvExpansions = view.findViewById(R.id.tvDetailGeneralRules)
         llResultsContainer = view.findViewById(R.id.llResultsContainer)
+
+        view.findViewById<Button>(R.id.btnDeleteMatch)?.setOnClickListener {
+            currentDetails?.match?.let { match ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Eliminar Partida")
+                    .setMessage("¿Estás seguro de que quieres eliminar esta partida?")
+                    .setPositiveButton("Eliminar") { _, _ ->
+                        viewModel.deleteMatch(match)
+                        parentFragmentManager.popBackStack()
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+            }
+        }
 
         matchId?.let { id ->
             viewModel.games.observe(viewLifecycleOwner) {

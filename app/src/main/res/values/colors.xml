@@ -24,7 +24,7 @@
     <color name="text_main_light">#332C26</color>
     <color name="text_secondary_light">#6D5F52</color>
     <color name="text_main_dark">#F4F1DE</color>
-    <color name="text_secondary_dark">#C4C1AF</color>
+    <color name="text_secondary_dark">#5ADEFF</color>
 
     <!-- Contenedores y otros -->
     <color name="surface_variant_light">#EAE2D6</color>

@@ -54,4 +54,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun getMatchWithDetails(matchId: String): MatchWithDetails {
         return matchDao.getMatchWithDetails(matchId)
     }
+
+    fun deleteMatch(match: Match) {
+        viewModelScope.launch {
+            matchDao.deleteTeamsForMatch(match.id)
+            matchDao.deletePlayersForMatch(match.id)
+            matchDao.deleteMatch(match)
+        }
+    }
 }

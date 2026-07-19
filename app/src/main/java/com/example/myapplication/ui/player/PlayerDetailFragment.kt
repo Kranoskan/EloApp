@@ -61,7 +61,7 @@ class PlayerDetailFragment : Fragment() {
         rvStats = view.findViewById(R.id.rvPlayerGameStats)
 
         setupRecyclerView()
-        setupUI()
+        setupUI(view)
         observeStats()
 
         return view
@@ -86,7 +86,7 @@ class PlayerDetailFragment : Fragment() {
         }
     }
 
-    private fun setupUI() {
+    private fun setupUI(view: View) {
         player?.let { p ->
             tvPlayerName.text = p.name
             if (p.imageUri != null) {
@@ -98,6 +98,20 @@ class PlayerDetailFragment : Fragment() {
 
         btnEdit.setOnClickListener {
             showEditPlayerDialog()
+        }
+
+        view.findViewById<Button>(R.id.btnDeletePlayer)?.setOnClickListener {
+            player?.let { p ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Eliminar Jugador")
+                    .setMessage("¿Estás seguro de que quieres eliminar a '${p.name}'? Sus estadísticas se perderán.")
+                    .setPositiveButton("Eliminar") { _, _ ->
+                        viewModel.deletePlayer(p)
+                        parentFragmentManager.popBackStack()
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+            }
         }
     }
 
@@ -141,7 +155,7 @@ class PlayerDetailFragment : Fragment() {
             updatedPlayer?.let {
                 viewModel.updatePlayer(it)
                 player = it
-                setupUI() // Refresh UI
+                view?.let { root -> setupUI(root) } // Refresh UI
             }
             dialog.dismiss()
         }

@@ -36,4 +36,14 @@ class GamesViewModel(application: Application) : AndroidViewModel(application) {
             gameDao.updateGame(game)
         }
     }
+
+    fun deleteGame(game: Game) {
+        viewModelScope.launch {
+            matchDao.deleteTeamsForGame(game.id)
+            matchDao.deletePlayersForGame(game.id)
+            matchDao.deleteMatchesForGame(game.id)
+            gameDao.deleteAttributesForGame(game.id)
+            gameDao.deleteGame(game)
+        }
+    }
 }

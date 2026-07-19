@@ -22,4 +22,10 @@ interface PlayerDao {
 
     @Query("SELECT * FROM player_ratings WHERE playerId = :playerId")
     fun getRatingsForPlayer(playerId: String): Flow<List<PlayerRating>>
+
+    @Delete
+    suspend fun deletePlayer(player: Player)
+
+    @Query("DELETE FROM player_ratings WHERE playerId = :playerId")
+    suspend fun deleteRatingsForPlayer(playerId: String)
 }

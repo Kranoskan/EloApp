@@ -34,6 +34,24 @@ interface MatchDao {
     @Transaction
     @Query("SELECT * FROM matches WHERE id IN (SELECT matchId FROM match_players WHERE playerId = :playerId)")
     fun getMatchesWithDetailsForPlayer(playerId: String): Flow<List<MatchWithDetails>>
+
+    @Delete
+    suspend fun deleteMatch(match: Match)
+
+    @Query("DELETE FROM match_teams WHERE matchId = :matchId")
+    suspend fun deleteTeamsForMatch(matchId: String)
+
+    @Query("DELETE FROM match_players WHERE matchId = :matchId")
+    suspend fun deletePlayersForMatch(matchId: String)
+
+    @Query("DELETE FROM matches WHERE gameId = :gameId")
+    suspend fun deleteMatchesForGame(gameId: String)
+
+    @Query("DELETE FROM match_teams WHERE matchId IN (SELECT id FROM matches WHERE gameId = :gameId)")
+    suspend fun deleteTeamsForGame(gameId: String)
+
+    @Query("DELETE FROM match_players WHERE matchId IN (SELECT id FROM matches WHERE gameId = :gameId)")
+    suspend fun deletePlayersForGame(gameId: String)
 }
 
 data class MatchWithGame(

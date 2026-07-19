@@ -75,4 +75,11 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             playerDao.updatePlayer(player)
         }
     }
+
+    fun deletePlayer(player: Player) {
+        viewModelScope.launch {
+            playerDao.deleteRatingsForPlayer(player.id)
+            playerDao.deletePlayer(player)
+        }
+    }
 }
