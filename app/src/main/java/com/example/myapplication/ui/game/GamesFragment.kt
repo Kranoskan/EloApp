@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.util.FileUtils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputLayout
 
@@ -97,9 +98,11 @@ class GamesFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            val savedUri = selectedImageUri?.let { FileUtils.saveImageToInternalStorage(requireContext(), it) }
+
             val game = Game(
                 name = name,
-                imageUri = selectedImageUri?.toString(),
+                imageUri = savedUri?.toString() ?: selectedImageUri?.toString(),
                 maxPlayers = etMaxPlayers.text.toString().toIntOrNull(),
                 lastTurn = etLastTurn.text.toString().toIntOrNull(),
                 teams = if (cbHasTeams.isChecked) etTeams.text.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() } else null,

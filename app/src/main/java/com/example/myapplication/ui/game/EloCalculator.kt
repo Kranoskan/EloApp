@@ -151,15 +151,20 @@ object EloCalculator {
         }
 
         // 2. Calcular Deltas para Equipos de Jugadores (Lógica existente)
-        val maxScore = (activeTeams.map { it.score } + participants.map { it.score }).maxOf { it }.coerceAtLeast(1.0)
-        
+        val allScores = activeTeams.map { it.score } + participants.map { it.score }
+        val maxScoreRaw = allScores.maxOrNull() ?: 0.0
+        val minScoreRaw = allScores.minOrNull() ?: 0.0
+        val isTie = maxScoreRaw == minScoreRaw
+        val maxScore = maxScoreRaw.coerceAtLeast(1.0)
+
         for (i in activeTeams.indices) {
             val teamA = activeTeams[i]
             var totalDelta = 0.0
             var rivals = 0
+            val actualOutcome = if (isTie) 0.5 else (teamA.score / maxScore)
             for (j in activeTeams.indices) {
                 if (i == j) continue
-                totalDelta += (teamA.score / maxScore) - calculateExpectedOutcome(teamA.virtualStrength, activeTeams[j].virtualStrength)
+                totalDelta += actualOutcome - calculateExpectedOutcome(teamA.virtualStrength, activeTeams[j].virtualStrength)
                 rivals++
             }
             teamA.deltaPoints = totalDelta / rivals.coerceAtLeast(1)
@@ -170,10 +175,11 @@ object EloCalculator {
             var totalDelta = 0.0
             var rivals = 0
             val virtualStrA = pA.baseRating + (if (pA.involvedPlayerRatings.isEmpty()) 1200.0 else pA.involvedPlayerRatings.average())
-            
+            val actualOutcome = if (isTie) 0.5 else (pA.score / maxScore)
+
             // Compiten contra los equipos reales
             for (teamB in activeTeams) {
-                totalDelta += (pA.score / maxScore) - calculateExpectedOutcome(virtualStrA, teamB.virtualStrength)
+                totalDelta += actualOutcome - calculateExpectedOutcome(virtualStrA, teamB.virtualStrength)
                 rivals++
             }
             pA.deltaPoints = totalDelta / rivals.coerceAtLeast(1)

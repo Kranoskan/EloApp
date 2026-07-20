@@ -38,9 +38,13 @@ class GameViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     fun render(game: Game, onItemSelected: (Game) -> Unit) {
         tvGameTitle.text = game.name
         if (game.imageUri != null) {
-            ivGameImage.setImageURI(Uri.parse(game.imageUri))
-            ivGameImage.setPadding(0, 0, 0, 0)
-            ivGameImage.colorFilter = null
+            try {
+                ivGameImage.setImageURI(Uri.parse(game.imageUri))
+                ivGameImage.setPadding(0, 0, 0, 0)
+                ivGameImage.colorFilter = null
+            } catch (e: SecurityException) {
+                ivGameImage.setImageResource(R.drawable.ic_meeple)
+            }
         } else {
             ivGameImage.setImageResource(R.drawable.ic_meeple)
             val padding = 8

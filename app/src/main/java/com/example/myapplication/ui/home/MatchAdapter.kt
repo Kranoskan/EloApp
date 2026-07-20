@@ -67,9 +67,13 @@ class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         tvMatchDate.text = sdf.format(Date(match.date))
 
         if (game.imageUri != null) {
-            ivMatchGame.setImageURI(android.net.Uri.parse(game.imageUri))
-            ivMatchGame.colorFilter = null
-            ivMatchGame.setPadding(0, 0, 0, 0)
+            try {
+                ivMatchGame.setImageURI(android.net.Uri.parse(game.imageUri))
+                ivMatchGame.colorFilter = null
+                ivMatchGame.setPadding(0, 0, 0, 0)
+            } catch (e: SecurityException) {
+                ivMatchGame.setImageResource(R.drawable.ic_meeple)
+            }
         } else {
             ivMatchGame.setImageResource(R.drawable.ic_meeple)
         }

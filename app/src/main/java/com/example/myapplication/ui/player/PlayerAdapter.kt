@@ -38,7 +38,11 @@ class PlayerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     fun render(player: Player, onItemSelected: (Player) -> Unit) {
         tvPlayerName.text = player.name
         if (player.imageUri != null) {
-            ivPlayer.setImageURI(Uri.parse(player.imageUri))
+            try {
+                ivPlayer.setImageURI(Uri.parse(player.imageUri))
+            } catch (e: SecurityException) {
+                ivPlayer.setImageResource(R.drawable.ic_launcher_foreground)
+            }
         } else {
             ivPlayer.setImageResource(R.drawable.ic_launcher_foreground) // Default image
         }

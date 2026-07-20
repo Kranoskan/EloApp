@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.util.FileUtils
 import java.util.Locale
 
 class PlayerDetailFragment : Fragment() {
@@ -90,7 +91,11 @@ class PlayerDetailFragment : Fragment() {
         player?.let { p ->
             tvPlayerName.text = p.name
             if (p.imageUri != null) {
-                ivPlayer.setImageURI(Uri.parse(p.imageUri))
+                try {
+                    ivPlayer.setImageURI(Uri.parse(p.imageUri))
+                } catch (e: SecurityException) {
+                    ivPlayer.setImageResource(R.drawable.ic_launcher_foreground)
+                }
             } else {
                 ivPlayer.setImageResource(R.drawable.ic_launcher_foreground)
             }
@@ -147,9 +152,17 @@ class PlayerDetailFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            val finalUri = selectedImageUri?.let { uri ->
+                if (uri.scheme == "content") {
+                    FileUtils.saveImageToInternalStorage(requireContext(), uri)
+                } else {
+                    uri
+                }
+            }
+
             val updatedPlayer = player?.copy(
                 name = name,
-                imageUri = selectedImageUri?.toString()
+                imageUri = (finalUri ?: selectedImageUri)?.toString()
             )
 
             updatedPlayer?.let {

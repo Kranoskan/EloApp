@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import android.content.Intent
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -16,6 +17,7 @@ import com.example.myapplication.ui.game.AppDatabase
 import com.example.myapplication.util.DriveServiceHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
@@ -31,11 +33,7 @@ class MainActivity : AppCompatActivity() {
     private var driveServiceHelper: DriveServiceHelper? = null
 
     private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            handleSignInResult(result.data)
-        } else {
-            Toast.makeText(this, "Sign in failed", Toast.LENGTH_SHORT).show()
-        }
+        handleSignInResult(result.data)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,9 +73,13 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         val client = GoogleSignIn.getClient(this, gso)
-        client.silentSignIn().addOnSuccessListener { googleAccount ->
-            handleSignInAccount(googleAccount)
-        }
+        client.silentSignIn()
+            .addOnSuccessListener { googleAccount ->
+                handleSignInAccount(googleAccount)
+            }
+            .addOnFailureListener { e ->
+                Log.d("DriveInfo", "Silent sign-in failed: ${e.message}")
+            }
     }
 
     private fun requestSignIn() {
@@ -91,13 +93,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleSignInResult(result: Intent?) {
-        GoogleSignIn.getSignedInAccountFromIntent(result)
-            .addOnSuccessListener { googleAccount ->
-                handleSignInAccount(googleAccount)
+        if (result == null) {
+            Log.e("DriveError", "Sign in result is null")
+            return
+        }
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result)
+            val account = task.getResult(ApiException::class.java)
+            if (account != null) {
+                handleSignInAccount(account)
+            } else {
+                Toast.makeText(this, "Google account is null", Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        } catch (e: ApiException) {
+            val message = when (e.statusCode) {
+                10 -> "Error 10: Error de configuración (¿SHA-1 registrado?)"
+                12500 -> "Error 12500: Fallo en la configuración de Google Play Services"
+                12501 -> "Inicio de sesión cancelado por el usuario"
+                7 -> "Error 7: Error de red"
+                else -> "Error de inicio de sesión: ${e.statusCode}"
             }
+            Log.e("DriveError", "Sign in failed: ${e.statusCode}", e)
+            if (e.statusCode != 12501) {
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun handleSignInAccount(googleAccount: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
@@ -108,7 +128,7 @@ class MainActivity : AppCompatActivity() {
 
         val googleDriveService = Drive.Builder(
             NetHttpTransport(),
-            GsonFactory(),
+            GsonFactory.getDefaultInstance(),
             credential
         )
             .setApplicationName("EloBoard")

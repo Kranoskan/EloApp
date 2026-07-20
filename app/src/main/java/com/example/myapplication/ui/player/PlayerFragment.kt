@@ -15,6 +15,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.util.FileUtils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class PlayerFragment : Fragment() {
@@ -89,9 +90,11 @@ class PlayerFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            val savedUri = selectedImageUri?.let { FileUtils.saveImageToInternalStorage(requireContext(), it) }
+
             val player = Player(
                 name = name,
-                imageUri = selectedImageUri?.toString()
+                imageUri = (savedUri ?: selectedImageUri)?.toString()
             )
 
             viewModel.addPlayer(player)

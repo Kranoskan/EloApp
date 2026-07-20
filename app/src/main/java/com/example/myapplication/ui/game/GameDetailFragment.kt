@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.myapplication.R
+import com.example.myapplication.util.FileUtils
 
 class GameDetailFragment : Fragment() {
 
@@ -37,7 +38,8 @@ class GameDetailFragment : Fragment() {
     // Contratos de galería para cambiar la foto desde el detalle
     private val changeImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            val updatedGame = currentGame.copy(imageUri = it.toString())
+            val savedUri = FileUtils.saveImageToInternalStorage(requireContext(), it)
+            val updatedGame = currentGame.copy(imageUri = (savedUri ?: it).toString())
             updateAndRefresh(updatedGame)
         }
     }
@@ -139,9 +141,13 @@ class GameDetailFragment : Fragment() {
         tvTitle.text = game.name
 
         if (game.imageUri != null) {
-            ivImage.setImageURI(Uri.parse(game.imageUri))
-            ivImage.colorFilter = null
-            ivImage.setPadding(0, 0, 0, 0)
+            try {
+                ivImage.setImageURI(Uri.parse(game.imageUri))
+                ivImage.colorFilter = null
+                ivImage.setPadding(0, 0, 0, 0)
+            } catch (e: SecurityException) {
+                ivImage.setImageResource(R.drawable.ic_meeple)
+            }
         } else {
             ivImage.setImageResource(R.drawable.ic_meeple)
         }
@@ -193,7 +199,7 @@ class GameDetailFragment : Fragment() {
                 }
             }
         } else {
-            addPlaceholderItem(llRulesContainer, "Sin reglas modificadas. (Pulsa el encabezado para añadir)")
+            addPlaceholderItem(llRulesContainer, "Sin reglas asimetricas ni roles. (Pulsa el encabezado para añadir)")
         }
     }
 
