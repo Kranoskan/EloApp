@@ -13,6 +13,9 @@
             <item
                 android:id="@+id/action_download"
                 android:title="@string/action_download" />
+            <item
+                android:id="@+id/action_recalculate"
+                android:title="@string/action_recalculate" />
         </menu>
     </item>
 </menu>

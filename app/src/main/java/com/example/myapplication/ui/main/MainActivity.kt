@@ -9,11 +9,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
 import com.example.myapplication.ui.home.HomeFragment
 import com.example.myapplication.ui.player.PlayerFragment
 import com.example.myapplication.ui.game.GamesFragment
 import com.example.myapplication.ui.game.AppDatabase
+import com.example.myapplication.ui.game.EloCalculator
+import com.example.myapplication.ui.game.MatchWithDetails
+import com.example.myapplication.ui.game.AttributeRating
+import com.example.myapplication.ui.player.PlayerRating
 import com.example.myapplication.util.DriveServiceHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -25,6 +30,9 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Collections
 
@@ -152,6 +160,10 @@ class MainActivity : AppCompatActivity() {
                 downloadDatabase()
                 true
             }
+            R.id.action_recalculate -> {
+                recalculateData()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -205,6 +217,73 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }.start()
+    }
+
+    private fun recalculateData() {
+        val database = AppDatabase.getDatabase(this)
+        val matchDao = database.matchDao()
+        val playerDao = database.playerDao()
+        val gameDao = database.gameDao()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val allMatches = matchDao.getAllMatchesWithDetailsAsc()
+
+                // 1. Reset everything
+                playerDao.deleteAllPlayerRatings()
+                gameDao.deleteAllAttributeRatings()
+
+                val playerRatingsMap = mutableMapOf<String, PlayerRating>() // Key: playerId:gameId
+                val attributeRatingsMap = mutableMapOf<String, AttributeRating>() // Key: gameId:type:name
+
+                // 2. Process matches chronologically
+                for (matchWithDetails in allMatches) {
+                    val game = matchWithDetails.game
+                    val players = matchWithDetails.players
+                    val teams = matchWithDetails.teams
+
+                    // Prepare current ratings for this match
+                    val currentRelevantPlayerRatings = players.associate { player ->
+                        val key = "${player.playerId}:${game.id}"
+                        player.playerId to (playerRatingsMap[key] ?: PlayerRating(playerId = player.playerId, gameId = game.id))
+                    }
+
+                    // For now, EloCalculator only handles 1vs1, so attributeRatings can be empty
+                    val currentRelevantAttributeRatings = mutableMapOf<String, AttributeRating>()
+
+                    // 3. Calculate new ratings
+                    val (updatedPlayerRatings, updatedAttributeRatings) = EloCalculator.calculateEloChanges(
+                        game,
+                        teams,
+                        players,
+                        currentRelevantPlayerRatings,
+                        currentRelevantAttributeRatings
+                    )
+
+                    // 4. Update in-memory maps
+                    updatedPlayerRatings.forEach { rating ->
+                        playerRatingsMap["${rating.playerId}:${rating.gameId}"] = rating
+                    }
+                    updatedAttributeRatings.forEach { rating ->
+                        attributeRatingsMap["${rating.gameId}:${rating.type}:${rating.name}"] = rating
+                    }
+                }
+
+                // 5. Save final ratings to database
+                playerDao.insertRatings(playerRatingsMap.values.toList())
+                gameDao.insertAttributeRatings(attributeRatingsMap.values.toList())
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Recálculo completado", Toast.LENGTH_SHORT).show()
+                    recreate() // Refresh UI
+                }
+            } catch (e: Exception) {
+                Log.e("Recalculate", "Error recalculating", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Error al recalcular: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun loadFragment(fragment: Fragment) {

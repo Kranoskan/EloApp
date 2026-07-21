@@ -13,3 +13,8 @@ data class Player(
     val name: String,
     val imageUri: String? = null
 ) : Parcelable
+
+data class PlayerWithStrength(
+    val player: Player,
+    val averageStrength: Double
+)

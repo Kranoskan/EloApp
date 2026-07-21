@@ -59,7 +59,7 @@ class PlayerFragment : Fragment() {
         rvPlayers.layoutManager = GridLayoutManager(context, 2)
         rvPlayers.adapter = playerAdapter
 
-        viewModel.players.observe(viewLifecycleOwner) { playersList: List<Player> ->
+        viewModel.playersWithStrength.observe(viewLifecycleOwner) { playersList ->
             playerAdapter.updateList(playersList)
         }
 

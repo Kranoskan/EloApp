@@ -19,6 +19,10 @@ interface MatchDao {
     suspend fun insertMatchPlayer(matchPlayer: MatchPlayer)
 
     @Transaction
+    @Query("SELECT * FROM matches ORDER BY date ASC")
+    suspend fun getAllMatchesWithDetailsAsc(): List<MatchWithDetails>
+
+    @Transaction
     @Query("SELECT * FROM matches WHERE id = :matchId")
     suspend fun getMatchWithDetails(matchId: String): MatchWithDetails
 

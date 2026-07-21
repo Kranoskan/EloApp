@@ -20,8 +20,17 @@ interface PlayerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRating(rating: PlayerRating)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRatings(ratings: List<PlayerRating>)
+
     @Query("SELECT * FROM player_ratings WHERE playerId = :playerId")
     fun getRatingsForPlayer(playerId: String): Flow<List<PlayerRating>>
+
+    @Query("SELECT * FROM player_ratings")
+    fun getAllRatings(): Flow<List<PlayerRating>>
+
+    @Query("DELETE FROM player_ratings")
+    suspend fun deleteAllPlayerRatings()
 
     @Delete
     suspend fun deletePlayer(player: Player)

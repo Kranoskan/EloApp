@@ -24,6 +24,17 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     val players = playerDao.getAllPlayers().asLiveData()
 
+    val playersWithStrength: LiveData<List<PlayerWithStrength>> = combine(
+        playerDao.getAllPlayers(),
+        playerDao.getAllRatings()
+    ) { players, ratings ->
+        players.map { player ->
+            val playerRatings = ratings.filter { it.playerId == player.id }
+            val avg = if (playerRatings.isEmpty()) 1200.0 else playerRatings.map { it.strength }.average()
+            PlayerWithStrength(player, avg)
+        }
+    }.asLiveData()
+
     fun getPlayerStats(playerId: String): LiveData<List<PlayerGameStats>> {
         return combine(
             matchDao.getMatchesWithDetailsForPlayer(playerId),
@@ -50,7 +61,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
                 PlayerGameStats(
                     gameName = matchDetailsList.first().game.name,
-                    matchesPlayed = rating?.matchesPlayed ?: totalMatches,
+                    matchesPlayed = totalMatches,
                     strength = rating?.strength?.toInt() ?: 1200,
                     winProbability = winProb
                 )

@@ -26,8 +26,14 @@ object EloCalculator {
         attributeRatings: Map<String, AttributeRating>
     ): Pair<List<PlayerRating>, List<AttributeRating>> {
 
-        val updatedPlayerRatings = mutableListOf<PlayerRating>()
-        val updatedAttributeRatings = mutableListOf<AttributeRating>()
+        val updatedPlayerRatingsMap = mutableMapOf<String, PlayerRating>()
+        val updatedAttributeRatingsMap = mutableMapOf<String, AttributeRating>()
+
+        // Inicializar todos los jugadores participantes con +1 partida jugada
+        matchPlayers.forEach { mp ->
+            val currentRating = playerRatings[mp.playerId] ?: PlayerRating(playerId = mp.playerId, gameId = game.id)
+            updatedPlayerRatingsMap[mp.playerId] = currentRating.copy(matchesPlayed = currentRating.matchesPlayed + 1)
+        }
 
         // =====================================================================
         // CASO 1 VS 1 PURO (Sin equipos ni información adicional)
@@ -42,7 +48,6 @@ object EloCalculator {
             val score1 = player1.score?.toDouble() ?: 0.0
             val score2 = player2.score?.toDouble() ?: 0.0
 
-            // Resultado del duelo: 1.0 (Gana P1), 0.0 (Gana P2), 0.5 (Empate)
             val outcome1 = when {
                 score1 > score2 -> 1.0
                 score1 < score2 -> 0.0
@@ -59,24 +64,21 @@ object EloCalculator {
             val delta1 = k1 * (outcome1 - expected1)
             val delta2 = k2 * (outcome2 - expected2)
 
-            updatedPlayerRatings.add(
-                rating1.copy(
-                    strength = rating1.strength + delta1,
-                    matchesPlayed = rating1.matchesPlayed + 1
-                )
+            updatedPlayerRatingsMap[player1.playerId] = updatedPlayerRatingsMap[player1.playerId]!!.copy(
+                strength = rating1.strength + delta1
             )
-            updatedPlayerRatings.add(
-                rating2.copy(
-                    strength = rating2.strength + delta2,
-                    matchesPlayed = rating2.matchesPlayed + 1
-                )
+            updatedPlayerRatingsMap[player2.playerId] = updatedPlayerRatingsMap[player2.playerId]!!.copy(
+                strength = rating2.strength + delta2
             )
-
-            // Devolvemos directamente sin procesar ningún atributo
-            return Pair(updatedPlayerRatings, updatedAttributeRatings)
+        }
+        // =====================================================================
+        // MULTIJUGADOR / EQUIPOS (Lógica simplificada por ahora)
+        // =====================================================================
+        else {
+            // TODO: Implementar Elo para multijugador/equipos de forma completa.
+            // Por ahora, al menos ya hemos incrementado matchesPlayed para todos arriba.
         }
 
-        // Aquí continuaría la lógica de equipos/atributos para partidas complejas...
-        return Pair(updatedPlayerRatings, updatedAttributeRatings)
+        return Pair(updatedPlayerRatingsMap.values.toList(), updatedAttributeRatingsMap.values.toList())
     }
 }
