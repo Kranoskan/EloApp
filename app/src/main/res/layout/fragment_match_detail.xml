@@ -26,13 +26,15 @@
             android:layout_marginBottom="16dp"/>
 
         <TextView
-            android:id="@+id/tvDetailGeneralRules"
+            android:id="@+id/tvDetailExpansions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:layout_marginBottom="16dp"
             android:background="?attr/colorSecondaryContainer"
-            android:padding="8dp"
+            android:padding="10dp"
+            android:textColor="?attr/colorOnSecondaryContainer"
+            android:textStyle="italic"
             android:visibility="gone"/>
 
         <TextView

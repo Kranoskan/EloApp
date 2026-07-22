@@ -34,6 +34,8 @@ class GameDetailFragment : Fragment() {
     private lateinit var tvTeamsHeader: TextView
     private lateinit var llRulesContainer: LinearLayout
     private lateinit var tvRulesHeader: TextView
+    private lateinit var llExpansionsContainer: LinearLayout
+    private lateinit var tvExpansionsHeader: TextView
 
     // Contratos de galería para cambiar la foto desde el detalle
     private val changeImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -76,6 +78,8 @@ class GameDetailFragment : Fragment() {
         tvTeamsHeader = view.findViewById(R.id.tvTeamsHeader)
         llRulesContainer = view.findViewById(R.id.llRulesContainer)
         tvRulesHeader = view.findViewById(R.id.tvRulesHeader)
+        llExpansionsContainer = view.findViewById(R.id.llExpansionsContainer)
+        tvExpansionsHeader = view.findViewById(R.id.tvExpansionsHeader)
 
         setupListeners(view)
         
@@ -123,7 +127,16 @@ class GameDetailFragment : Fragment() {
             }
         }
 
-        // 5. Eliminar juego
+        // 5. Modificar Expansiones al hacer click en su encabezado
+        tvExpansionsHeader.setOnClickListener {
+            showAddElementDialog("Expansión/Mapa") { newExpansion ->
+                val currentExpansions = currentGame.expansions?.toMutableList() ?: mutableListOf()
+                currentExpansions.add(newExpansion)
+                updateAndRefresh(currentGame.copy(expansions = currentExpansions))
+            }
+        }
+
+        // 6. Eliminar juego
         view.findViewById<Button>(R.id.btnDeleteGame)?.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Eliminar Juego")
@@ -158,6 +171,7 @@ class GameDetailFragment : Fragment() {
         llTurnsContainer.removeAllViews()
         llTeamsContainer.removeAllViews()
         llRulesContainer.removeAllViews()
+        llExpansionsContainer.removeAllViews()
 
         // 1. Render de Turnos con la nueva UI
         val lastTurn = game.lastTurn ?: 0
@@ -201,6 +215,20 @@ class GameDetailFragment : Fragment() {
         } else {
             addPlaceholderItem(llRulesContainer, "Sin reglas asimetricas ni roles. (Pulsa el encabezado para añadir)")
         }
+
+        // 4. Render de Expansiones y Mapas
+        tvExpansionsHeader.visibility = View.VISIBLE
+        val expansions = game.expansions ?: emptyList()
+        if (expansions.isNotEmpty()) {
+            expansions.forEach { expansion ->
+                addInfoItem(llExpansionsContainer, expansion, "🗺️", isDeletable = true, showStat = false) {
+                    val updatedExpansions = expansions.toMutableList().apply { remove(expansion) }
+                    updateAndRefresh(currentGame.copy(expansions = if (updatedExpansions.isEmpty()) null else updatedExpansions))
+                }
+            }
+        } else {
+            addPlaceholderItem(llExpansionsContainer, "Sin expansiones ni mapas. (Pulsa el encabezado para añadir)")
+        }
     }
 
     // Encapsula la actualización del ViewModel y refresca la UI actual
@@ -219,6 +247,7 @@ class GameDetailFragment : Fragment() {
         icon: String,
         isDeletable: Boolean,
         strength: Double = 0.0,
+        showStat: Boolean = true,
         onDeleted: () -> Unit
     ) {
         val itemView = LayoutInflater.from(context).inflate(R.layout.item_detail_token, container, false)
@@ -231,11 +260,15 @@ class GameDetailFragment : Fragment() {
         tvIcon.text = icon
         tvName.text = title
 
-        // Mostrar fuerza del atributo (calculada o extraída del texto)
-        val extraStrength = extractStrength(title)
-        val totalStrength = strength + extraStrength
-        tvStat.text = "Fuerza ${totalStrength.toInt()}"
-        tvStat.visibility = View.VISIBLE
+        if (showStat) {
+            // Mostrar fuerza del atributo (calculada o extraída del texto)
+            val extraStrength = extractStrength(title)
+            val totalStrength = strength + extraStrength
+            tvStat.text = "Fuerza ${totalStrength.toInt()}"
+            tvStat.visibility = View.VISIBLE
+        } else {
+            tvStat.visibility = View.GONE
+        }
 
         if (isDeletable) {
             btnDelete.visibility = View.VISIBLE

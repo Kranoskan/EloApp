@@ -50,7 +50,7 @@ class MatchDetailFragment : Fragment() {
         
         tvGameName = view.findViewById(R.id.tvDetailGameName)
         tvDate = view.findViewById(R.id.tvDetailDate)
-        tvExpansions = view.findViewById(R.id.tvDetailGeneralRules)
+        tvExpansions = view.findViewById(R.id.tvDetailExpansions)
         llResultsContainer = view.findViewById(R.id.llResultsContainer)
 
         view.findViewById<Button>(R.id.btnDeleteMatch)?.setOnClickListener {
