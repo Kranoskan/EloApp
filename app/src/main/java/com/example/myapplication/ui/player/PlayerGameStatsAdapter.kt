@@ -33,12 +33,28 @@ class PlayerGameStatsAdapter : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewH
         private val tvStrength: TextView = view.findViewById(R.id.tvStatStrength)
         private val tvWinProb: TextView = view.findViewById(R.id.tvStatWinProb)
         private val tvMatches: TextView = view.findViewById(R.id.tvStatMatches)
+        private val ivGameImage: android.widget.ImageView = view.findViewById(R.id.ivStatGameImage)
 
         fun bind(stat: PlayerGameStats) {
             tvGameName.text = stat.gameName
             tvStrength.text = "Fuerza: ${stat.strength}"
             tvWinProb.text = String.format(Locale.getDefault(), "Prob. Victoria: %.0f%%", stat.winProbability * 100)
             tvMatches.text = "Partidas: ${stat.matchesPlayed}"
+
+            if (stat.gameImageUri != null) {
+                try {
+                    ivGameImage.setImageURI(android.net.Uri.parse(stat.gameImageUri))
+                    ivGameImage.colorFilter = null
+                    ivGameImage.imageTintList = null
+                    ivGameImage.setPadding(0, 0, 0, 0)
+                } catch (e: Exception) {
+                    ivGameImage.setImageResource(R.drawable.ic_games)
+                }
+            } else {
+                ivGameImage.setImageResource(R.drawable.ic_games)
+                val padding = 16
+                ivGameImage.setPadding(padding, padding, padding, padding)
+            }
         }
     }
 }

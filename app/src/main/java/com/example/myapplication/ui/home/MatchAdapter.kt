@@ -70,12 +70,16 @@ class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             try {
                 ivMatchGame.setImageURI(android.net.Uri.parse(game.imageUri))
                 ivMatchGame.colorFilter = null
+                ivMatchGame.imageTintList = null
                 ivMatchGame.setPadding(0, 0, 0, 0)
-            } catch (e: SecurityException) {
-                ivMatchGame.setImageResource(R.drawable.ic_meeple)
+            } catch (e: Exception) {
+                ivMatchGame.setImageResource(R.drawable.ic_games)
+                ivMatchGame.setPadding(12, 12, 12, 12)
             }
         } else {
-            ivMatchGame.setImageResource(R.drawable.ic_meeple)
+            ivMatchGame.setImageResource(R.drawable.ic_games)
+            val padding = 12
+            ivMatchGame.setPadding(padding, padding, padding, padding)
         }
 
         itemView.setOnClickListener { onItemSelected(match) }

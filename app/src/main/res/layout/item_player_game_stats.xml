@@ -13,44 +13,60 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvStatGameName"
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivStatGameImage"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+            android:background="?attr/colorSecondaryContainer"
+            android:src="@drawable/ic_games"
+            app:tint="?attr/colorPrimary"/>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorPrimary"
-            tools:text="Catan"
-            android:layout_marginBottom="4dp"
-            android:maxLines="1"
-            android:ellipsize="end"/>
+            android:orientation="vertical"
+            android:padding="8dp">
 
-        <TextView
-            android:id="@+id/tvStatStrength"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            tools:text="Fuerza: 1200"
-            android:textColor="?attr/colorOnSurfaceVariant"/>
+            <TextView
+                android:id="@+id/tvStatGameName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                tools:text="Catan"
+                android:layout_marginBottom="4dp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
 
-        <TextView
-            android:id="@+id/tvStatWinProb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            tools:text="Win: 50%"
-            android:textColor="?attr/colorOnSurfaceVariant"/>
+            <TextView
+                android:id="@+id/tvStatStrength"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                tools:text="Fuerza: 1200"
+                android:textColor="?attr/colorOnSurfaceVariant"/>
 
-        <TextView
-            android:id="@+id/tvStatMatches"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            tools:text="Partidas: 5"
-            android:textColor="?attr/colorOnSurfaceVariant"/>
+            <TextView
+                android:id="@+id/tvStatWinProb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                tools:text="Win: 50%"
+                android:textColor="?attr/colorOnSurfaceVariant"/>
 
+            <TextView
+                android:id="@+id/tvStatMatches"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                tools:text="Partidas: 5"
+                android:textColor="?attr/colorOnSurfaceVariant"/>
+
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

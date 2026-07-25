@@ -26,6 +26,7 @@ class MatchDetailFragment : Fragment() {
     private lateinit var tvDate: TextView
     private lateinit var tvExpansions: TextView
     private lateinit var llResultsContainer: LinearLayout
+    private lateinit var ivGameImage: android.widget.ImageView
 
     companion object {
         private const val ARG_MATCH_ID = "match_id"
@@ -52,6 +53,7 @@ class MatchDetailFragment : Fragment() {
         tvDate = view.findViewById(R.id.tvDetailDate)
         tvExpansions = view.findViewById(R.id.tvDetailExpansions)
         llResultsContainer = view.findViewById(R.id.llResultsContainer)
+        ivGameImage = view.findViewById(R.id.ivDetailGameImage)
 
         view.findViewById<Button>(R.id.btnDeleteMatch)?.setOnClickListener {
             currentDetails?.match?.let { match ->
@@ -100,6 +102,21 @@ class MatchDetailFragment : Fragment() {
         // Since I have access to games in the ViewModel, I can find it.
         val game = viewModel.games.value?.find { it.id == match.gameId }
         tvGameName.text = game?.name ?: "Juego Desconocido"
+
+        if (game?.imageUri != null) {
+            try {
+                ivGameImage.setImageURI(android.net.Uri.parse(game.imageUri))
+                ivGameImage.colorFilter = null
+                ivGameImage.imageTintList = null
+                ivGameImage.setPadding(0, 0, 0, 0)
+            } catch (e: Exception) {
+                ivGameImage.setImageResource(R.drawable.ic_games)
+            }
+        } else {
+            ivGameImage.setImageResource(R.drawable.ic_games)
+            val padding = 32
+            ivGameImage.setPadding(padding, padding, padding, padding)
+        }
 
         val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
         tvDate.text = sdf.format(Date(match.date))

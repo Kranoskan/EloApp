@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 data class PlayerGameStats(
     val gameName: String,
+    val gameImageUri: String? = null,
     val strength: Int = 1200,
     val winProbability: Double = 0.5,
     val matchesPlayed: Int
@@ -61,6 +62,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
                 PlayerGameStats(
                     gameName = matchDetailsList.first().game.name,
+                    gameImageUri = matchDetailsList.first().game.imageUri,
                     matchesPlayed = totalMatches,
                     strength = rating?.strength?.toInt() ?: 1200,
                     winProbability = winProb
