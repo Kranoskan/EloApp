@@ -16,9 +16,9 @@
 
         <!-- Imagen tipo Token - Pulsable para cambiar foto -->
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            app:cardCornerRadius="80dp"
+            android:layout_width="240dp"
+            android:layout_height="220dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="10dp"
             app:strokeWidth="3dp"
             app:strokeColor="?attr/colorSecondary"
@@ -32,9 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_meeple"
-                app:tint="?attr/colorPrimary"
-                app:tintMode="multiply"/>
+                android:src="@drawable/ic_meeple"/>
         </com.google.android.material.card.MaterialCardView>
 
         <TextView

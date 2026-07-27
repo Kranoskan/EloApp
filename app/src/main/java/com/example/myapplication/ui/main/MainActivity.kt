@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val viewPager = findViewById<ViewPager2>(R.id.fragment_container)
+        val viewPager = findViewById<ViewPager2>(R.id.view_pager)
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         val adapter = MainPagerAdapter(this)
