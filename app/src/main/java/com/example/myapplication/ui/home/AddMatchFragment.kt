@@ -53,14 +53,20 @@ class AddMatchFragment : Fragment() {
             allGames = games
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, games.map { it.name })
             (actvSelectGame as? MaterialAutoCompleteTextView)?.setAdapter(adapter)
+            actvSelectGame.threshold = 1
+        }
+
+        actvSelectGame.setOnClickListener {
+            (actvSelectGame as? MaterialAutoCompleteTextView)?.showDropDown()
         }
 
         viewModel.players.observe(viewLifecycleOwner) { players ->
             allPlayers = players
         }
 
-        actvSelectGame.setOnItemClickListener { _, _, position, _ ->
-            selectedGame = allGames[position]
+        actvSelectGame.setOnItemClickListener { parent, _, position, _ ->
+            val selectedName = parent.getItemAtPosition(position) as String
+            selectedGame = allGames.find { it.name == selectedName }
             onGameSelected()
         }
 
@@ -153,14 +159,19 @@ class AddMatchFragment : Fragment() {
         if (teams.isNotEmpty()) {
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, teams)
             actvTeamName.setAdapter(adapter)
-            // Make it a dropdown
-            actvTeamName.inputType = android.text.InputType.TYPE_NULL
+            actvTeamName.threshold = 1
+        }
+
+        actvTeamName.setOnClickListener {
+            actvTeamName.showDropDown()
         }
 
         btnRemoveTeam.setOnClickListener { llParticipantsContainer.removeView(teamView) }
         btnAddPlayerToTeam.setOnClickListener { addPlayerView(llTeamPlayersContainer, isInsideTeam = true) }
 
         llParticipantsContainer.addView(teamView)
+        teamView.alpha = 0f
+        teamView.animate().alpha(1f).setDuration(300).start()
     }
 
     private fun addPlayerView(container: LinearLayout, isInsideTeam: Boolean = false) {
@@ -176,6 +187,11 @@ class AddMatchFragment : Fragment() {
         // Players dropdown
         val playerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, allPlayers.map { it.name })
         actvPlayerName.setAdapter(playerAdapter)
+        actvPlayerName.threshold = 1
+
+        actvPlayerName.setOnClickListener {
+            actvPlayerName.showDropDown()
+        }
 
         // Special Rules multi-select
         val selectedPlayerRules = mutableListOf<String>()
@@ -208,6 +224,8 @@ class AddMatchFragment : Fragment() {
         btnRemovePlayer.setOnClickListener { container.removeView(playerView) }
 
         container.addView(playerView)
+        playerView.alpha = 0f
+        playerView.animate().alpha(1f).setDuration(300).start()
     }
 
     private fun updatePlayerRulesChips(chipGroup: ChipGroup, selectedRules: MutableList<String>) {
@@ -225,8 +243,13 @@ class AddMatchFragment : Fragment() {
     }
 
     private fun saveMatch() {
+        val currentGameName = actvSelectGame.text.toString()
+        if (selectedGame == null || selectedGame?.name != currentGameName) {
+            selectedGame = allGames.find { it.name.equals(currentGameName, ignoreCase = true) }
+        }
+
         val game = selectedGame ?: run {
-            Toast.makeText(requireContext(), "Selecciona un juego", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Selecciona un juego válido", Toast.LENGTH_SHORT).show()
             return
         }
 

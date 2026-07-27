@@ -6,10 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.ImageView
+import android.widget.*
+import androidx.core.widget.addTextChangedListener
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -27,6 +25,9 @@ class GamesFragment : Fragment() {
     private lateinit var rvGames: RecyclerView
     private lateinit var gameAdapter: GameAdapter
     private lateinit var fabAddGame: FloatingActionButton
+    private lateinit var etSearchGame: EditText
+
+    private var allGamesList: List<Game> = emptyList()
 
     private var selectedImageUri: Uri? = null
     private var ivDialogPreview: ImageView? = null
@@ -46,6 +47,7 @@ class GamesFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_games, container, false)
         rvGames = view.findViewById(R.id.rvGames)
         fabAddGame = view.findViewById(R.id.fabAddGame)
+        etSearchGame = view.findViewById(R.id.etSearchGame)
 
         gameAdapter = GameAdapter(emptyList()) { game ->
             navigateToDetail(game)
@@ -55,7 +57,12 @@ class GamesFragment : Fragment() {
         rvGames.adapter = gameAdapter
 
         viewModel.games.observe(viewLifecycleOwner) { games ->
-            gameAdapter.updateList(games)
+            allGamesList = games
+            filterGames(etSearchGame.text.toString())
+        }
+
+        etSearchGame.addTextChangedListener { text ->
+            filterGames(text.toString())
         }
 
         fabAddGame.setOnClickListener {
@@ -63,6 +70,15 @@ class GamesFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun filterGames(query: String) {
+        val filteredList = if (query.isEmpty()) {
+            allGamesList
+        } else {
+            allGamesList.filter { it.name.contains(query, ignoreCase = true) }
+        }
+        gameAdapter.updateList(filteredList)
     }
 
     private fun showAddGameDialog() {
@@ -121,6 +137,12 @@ class GamesFragment : Fragment() {
     private fun navigateToDetail(game: Game) {
         val fragment = GameDetailFragment.newInstance(game)
         parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()

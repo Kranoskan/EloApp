@@ -24,6 +24,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private val matchDao = AppDatabase.getDatabase(application).matchDao()
 
     val players = playerDao.getAllPlayers().asLiveData()
+    val allRatings = playerDao.getAllRatings().asLiveData()
 
     val playersWithStrength: LiveData<List<PlayerWithStrength>> = combine(
         playerDao.getAllPlayers(),

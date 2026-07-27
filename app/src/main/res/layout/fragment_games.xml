@@ -11,17 +11,58 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Título principal estilo caja de juego -->
-        <TextView
+        <!-- Título principal estilizado con iconos de Meeple -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginVertical="24dp"
-            android:text="LUDOTECA"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.2" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_meeple"
+                app:tint="?attr/colorSecondary"
+                android:layout_marginEnd="12dp"
+                android:alpha="0.8"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_ludoteca"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.2" />
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_meeple"
+                app:tint="?attr/colorSecondary"
+                android:layout_marginStart="12dp"
+                android:alpha="0.8"/>
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSearchGame"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/hint_search_game"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:endIconMode="clear_text">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etSearchGame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Lista adaptada para contener cartas de juego con espacio -->
         <androidx.recyclerview.widget.RecyclerView
@@ -32,6 +73,7 @@
             android:paddingBottom="80dp"
             android:clipToPadding="false"
             android:scrollbars="none"
+            android:layoutAnimation="@anim/layout_animation_fall_down"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="2"
             tools:listitem="@layout/item_game"/>

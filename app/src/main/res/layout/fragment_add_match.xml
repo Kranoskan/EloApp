@@ -31,7 +31,8 @@
                 android:id="@+id/actvSelectGame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none" />
+                android:inputType="textCapSentences"
+                android:completionThreshold="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView

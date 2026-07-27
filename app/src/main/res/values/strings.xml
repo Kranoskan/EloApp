@@ -8,4 +8,9 @@
     <string name="action_upload">Subir a la nube</string>
     <string name="action_download">Cargar datos</string>
     <string name="action_recalculate">Recalcular</string>
+    <string name="title_ludoteca">LUDOTECA</string>
+    <string name="action_view_games">VER DETALLES</string>
+    <string name="hint_search_game">Buscar juego...</string>
+    <string name="hint_search_player">Buscar jugador...</string>
+    <string name="hint_filter_by_game">Filtrar por juego</string>
 </resources>

@@ -10,6 +10,8 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.R
 import com.example.myapplication.ui.home.HomeFragment
 import com.example.myapplication.ui.player.PlayerFragment
@@ -51,20 +53,30 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        val viewPager = findViewById<ViewPager2>(R.id.fragment_container)
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        val adapter = MainPagerAdapter(this)
+        viewPager.adapter = adapter
+
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                bottomNavigation.menu.getItem(position).isChecked = true
+            }
+        })
 
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    loadFragment(HomeFragment())
+                    viewPager.currentItem = 0
                     true
                 }
                 R.id.nav_player -> {
-                    loadFragment(PlayerFragment())
+                    viewPager.currentItem = 1
                     true
                 }
                 R.id.nav_games -> {
-                    loadFragment(GamesFragment())
+                    viewPager.currentItem = 2
                     true
                 }
                 else -> false
@@ -72,6 +84,18 @@ class MainActivity : AppCompatActivity() {
         }
         
         silentSignIn()
+    }
+
+    private inner class MainPagerAdapter(activity: AppCompatActivity) : FragmentStateAdapter(activity) {
+        override fun getItemCount(): Int = 3
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> HomeFragment()
+                1 -> PlayerFragment()
+                2 -> GamesFragment()
+                else -> HomeFragment()
+            }
+        }
     }
 
     private fun silentSignIn() {
@@ -288,6 +312,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
             .replace(R.id.fragment_container, fragment)
             .commit()
     }

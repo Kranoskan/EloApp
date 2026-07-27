@@ -48,6 +48,12 @@ class HomeFragment : Fragment() {
     private fun navigateToAddMatch() {
         val fragment = AddMatchFragment()
         parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()
@@ -56,6 +62,12 @@ class HomeFragment : Fragment() {
     private fun navigateToDetail(match: Match) {
         val fragment = MatchDetailFragment.newInstance(match.id)
         parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()
