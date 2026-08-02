@@ -5,7 +5,7 @@
     <string name="menu_games">Juegos</string>
     <string name="filtros">Filtros</string>
     <string name="action_settings">Ajustes</string>
-    <string name="action_upload">Subir a la nube</string>
+    <string name="action_upload">Guardar datos</string>
     <string name="action_download">Cargar datos</string>
     <string name="action_recalculate">Recalcular</string>
     <string name="title_ludoteca">LUDOTECA</string>

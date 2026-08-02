@@ -19,6 +19,10 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addMatch(match: Match, teams: List<MatchTeam>, players: List<MatchPlayer>) {
         viewModelScope.launch {
+            // Eliminar detalles antiguos si es una edición
+            matchDao.deleteTeamsForMatch(match.id)
+            matchDao.deletePlayersForMatch(match.id)
+
             // 1. Insertar la partida y sus detalles
             matchDao.insertMatch(match)
             teams.forEach { matchDao.insertMatchTeam(it) }

@@ -1,29 +1,29 @@
 package com.example.myapplication.ui.main
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.R
+import com.example.myapplication.ui.game.AppDatabase
+import com.example.myapplication.ui.game.AttributeRating
+import com.example.myapplication.ui.game.EloCalculator
+import com.example.myapplication.ui.game.GamesFragment
 import com.example.myapplication.ui.home.HomeFragment
 import com.example.myapplication.ui.player.PlayerFragment
-import com.example.myapplication.ui.game.GamesFragment
-import com.example.myapplication.ui.game.AppDatabase
-import com.example.myapplication.ui.game.EloCalculator
-import com.example.myapplication.ui.game.MatchWithDetails
-import com.example.myapplication.ui.game.AttributeRating
 import com.example.myapplication.ui.player.PlayerRating
 import com.example.myapplication.util.DriveServiceHelper
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.example.myapplication.util.ZipUtils
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -36,14 +36,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.Collections
 
 class MainActivity : AppCompatActivity() {
 
     private var driveServiceHelper: DriveServiceHelper? = null
 
-    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        handleSignInResult(result.data)
+    private val selectZipLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { restoreDatabaseFromUri(it) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,22 +73,25 @@ class MainActivity : AppCompatActivity() {
                     viewPager.currentItem = 0
                     true
                 }
+
                 R.id.nav_player -> {
                     viewPager.currentItem = 1
                     true
                 }
+
                 R.id.nav_games -> {
                     viewPager.currentItem = 2
                     true
                 }
+
                 else -> false
             }
         }
-        
-        silentSignIn()
+
     }
 
-    private inner class MainPagerAdapter(activity: AppCompatActivity) : FragmentStateAdapter(activity) {
+    private inner class MainPagerAdapter(activity: AppCompatActivity) :
+        FragmentStateAdapter(activity) {
         override fun getItemCount(): Int = 3
         override fun createFragment(position: Int): Fragment {
             return when (position) {
@@ -96,77 +101,6 @@ class MainActivity : AppCompatActivity() {
                 else -> HomeFragment()
             }
         }
-    }
-
-    private fun silentSignIn() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-            .build()
-
-        val client = GoogleSignIn.getClient(this, gso)
-        client.silentSignIn()
-            .addOnSuccessListener { googleAccount ->
-                handleSignInAccount(googleAccount)
-            }
-            .addOnFailureListener { e ->
-                Log.d("DriveInfo", "Silent sign-in failed: ${e.message}")
-            }
-    }
-
-    private fun requestSignIn() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-            .build()
-
-        val client = GoogleSignIn.getClient(this, gso)
-        googleSignInLauncher.launch(client.signInIntent)
-    }
-
-    private fun handleSignInResult(result: Intent?) {
-        if (result == null) {
-            Log.e("DriveError", "Sign in result is null")
-            return
-        }
-        try {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result)
-            val account = task.getResult(ApiException::class.java)
-            if (account != null) {
-                handleSignInAccount(account)
-            } else {
-                Toast.makeText(this, "Google account is null", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: ApiException) {
-            val message = when (e.statusCode) {
-                10 -> "Error 10: Error de configuración (¿SHA-1 registrado?)"
-                12500 -> "Error 12500: Fallo en la configuración de Google Play Services"
-                12501 -> "Inicio de sesión cancelado por el usuario"
-                7 -> "Error 7: Error de red"
-                else -> "Error de inicio de sesión: ${e.statusCode}"
-            }
-            Log.e("DriveError", "Sign in failed: ${e.statusCode}", e)
-            if (e.statusCode != 12501) {
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    private fun handleSignInAccount(googleAccount: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
-        val credential = GoogleAccountCredential.usingOAuth2(
-            this, Collections.singleton(DriveScopes.DRIVE_APPDATA)
-        )
-        credential.selectedAccount = googleAccount.account
-
-        val googleDriveService = Drive.Builder(
-            NetHttpTransport(),
-            GsonFactory.getDefaultInstance(),
-            credential
-        )
-            .setApplicationName("EloBoard")
-            .build()
-
-        driveServiceHelper = DriveServiceHelper(googleDriveService)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -180,67 +114,93 @@ class MainActivity : AppCompatActivity() {
                 uploadDatabase()
                 true
             }
+
             R.id.action_download -> {
                 downloadDatabase()
                 true
             }
+
             R.id.action_recalculate -> {
                 recalculateData()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun uploadDatabase() {
-        if (driveServiceHelper == null) {
-            requestSignIn()
-            return
-        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val dbName = "meepleforce_database"
+                val dbFile = getDatabasePath(dbName)
+                val dbShm = File(dbFile.path + "-shm")
+                val dbWal = File(dbFile.path + "-wal")
 
-        val dbFile = getDatabasePath("meepleforce_database")
-        if (dbFile.exists()) {
-            Thread {
-                val fileId = driveServiceHelper?.uploadFile(dbFile, "meepleforce_database.db")
-                runOnUiThread {
-                    if (fileId != null) {
-                        Toast.makeText(this, "Copia de seguridad subida con éxito", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Error al subir la copia de seguridad", Toast.LENGTH_SHORT).show()
-                    }
+                val filesToZip = listOf(dbFile, dbShm, dbWal)
+                val zipFile = File(cacheDir, "meepleforce_backup.zip")
+
+                ZipUtils.zip(filesToZip, zipFile)
+
+                val contentUri = FileProvider.getUriForFile(
+                    this@MainActivity,
+                    "${packageName}.fileprovider",
+                    zipFile
+                )
+
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/zip"
+                    putExtra(Intent.EXTRA_STREAM, contentUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-            }.start()
+
+                withContext(Dispatchers.Main) {
+                    startActivity(Intent.createChooser(shareIntent, "Compartir base de datos"))
+                }
+            } catch (e: Exception) {
+                Log.e("Upload", "Error zipping database", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Error al preparar backup: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
     private fun downloadDatabase() {
-        if (driveServiceHelper == null) {
-            requestSignIn()
-            return
-        }
+        selectZipLauncher.launch("application/zip")
+    }
 
-        val dbFile = getDatabasePath("meepleforce_database")
-        Thread {
-            // Close database before overwriting
-            AppDatabase.closeDatabase()
-            
-            // Delete journal files if they exist
-            val walFile = File(dbFile.path + "-wal")
-            val shmFile = File(dbFile.path + "-shm")
-            if (walFile.exists()) walFile.delete()
-            if (shmFile.exists()) shmFile.delete()
+    private fun restoreDatabaseFromUri(uri: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val dbName = "meepleforce_database"
+                val dbFile = getDatabasePath(dbName)
+                val dbShm = File(dbFile.path + "-shm")
+                val dbWal = File(dbFile.path + "-wal")
+                
+                // Close database before overwriting
+                AppDatabase.closeDatabase()
 
-            val success = driveServiceHelper?.downloadFile(dbFile, "meepleforce_database.db") ?: false
-            runOnUiThread {
-                if (success) {
-                    Toast.makeText(this, "Datos cargados con éxito. Reiniciando aplicación...", Toast.LENGTH_SHORT).show()
-                    // Restart app or reload data
+                // Delete current files to avoid issues
+                dbFile.delete()
+                dbShm.delete()
+                dbWal.delete()
+
+                contentResolver.openInputStream(uri)?.use { inputStream ->
+                    ZipUtils.unzip(inputStream, dbFile.parentFile!!)
+                }
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Datos restaurados correctamente", Toast.LENGTH_SHORT).show()
                     recreate()
-                } else {
-                    Toast.makeText(this, "Error al cargar los datos", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e("Download", "Error restoring database", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Error al restaurar: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
-        }.start()
+        }
     }
 
     private fun recalculateData() {
@@ -258,7 +218,8 @@ class MainActivity : AppCompatActivity() {
                 gameDao.deleteAllAttributeRatings()
 
                 val playerRatingsMap = mutableMapOf<String, PlayerRating>() // Key: playerId:gameId
-                val attributeRatingsMap = mutableMapOf<String, AttributeRating>() // Key: gameId:type:name
+                val attributeRatingsMap =
+                    mutableMapOf<String, AttributeRating>() // Key: gameId:type:name
 
                 // 2. Process matches chronologically
                 for (matchWithDetails in allMatches) {
@@ -269,7 +230,8 @@ class MainActivity : AppCompatActivity() {
                     // Prepare current ratings for this match
                     val currentRelevantPlayerRatings = players.associate { player ->
                         val key = "${player.playerId}:${game.id}"
-                        player.playerId to (playerRatingsMap[key] ?: PlayerRating(playerId = player.playerId, gameId = game.id))
+                        player.playerId to (playerRatingsMap[key]
+                            ?: PlayerRating(playerId = player.playerId, gameId = game.id))
                     }
 
                     // For now, EloCalculator only handles 1vs1, so attributeRatings can be empty
@@ -289,7 +251,8 @@ class MainActivity : AppCompatActivity() {
                         playerRatingsMap["${rating.playerId}:${rating.gameId}"] = rating
                     }
                     updatedAttributeRatings.forEach { rating ->
-                        attributeRatingsMap["${rating.gameId}:${rating.type}:${rating.name}"] = rating
+                        attributeRatingsMap["${rating.gameId}:${rating.type}:${rating.name}"] =
+                            rating
                     }
                 }
 
@@ -298,27 +261,21 @@ class MainActivity : AppCompatActivity() {
                 gameDao.insertAttributeRatings(attributeRatingsMap.values.toList())
 
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Recálculo completado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Recálculo completado", Toast.LENGTH_SHORT)
+                        .show()
                     recreate() // Refresh UI
                 }
             } catch (e: Exception) {
                 Log.e("Recalculate", "Error recalculating", e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Error al recalcular: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Error al recalcular: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_left,
-                R.anim.slide_in_left,
-                R.anim.slide_out_right
-            )
-            .replace(R.id.fragment_container, fragment)
-            .commit()
-    }
 }

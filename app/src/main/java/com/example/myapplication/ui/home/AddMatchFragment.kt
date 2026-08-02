@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
 import com.example.myapplication.ui.game.*
 import com.example.myapplication.ui.player.Player
@@ -15,10 +16,12 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import kotlinx.coroutines.launch
 
 class AddMatchFragment : Fragment() {
 
     private val viewModel: MatchViewModel by activityViewModels()
+    private var matchId: String? = null
     
     private lateinit var actvSelectGame: AutoCompleteTextView
     private lateinit var tvExpansionsLabel: TextView
@@ -33,6 +36,21 @@ class AddMatchFragment : Fragment() {
     private var allPlayers: List<Player> = emptyList()
     private var selectedGame: Game? = null
     private var selectedExpansions: MutableList<String> = mutableListOf()
+
+    companion object {
+        private const val ARG_MATCH_ID = "match_id"
+
+        fun newInstance(matchId: String? = null) = AddMatchFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_MATCH_ID, matchId)
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        matchId = arguments?.getString(ARG_MATCH_ID)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -90,7 +108,116 @@ class AddMatchFragment : Fragment() {
             saveMatch()
         }
 
+        if (matchId != null) {
+            btnSaveMatch.text = "ACTUALIZAR PARTIDA"
+        }
+
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        matchId?.let { id ->
+            lifecycleScope.launch {
+                val details = viewModel.getMatchWithDetails(id)
+                loadMatchForEdit(details)
+            }
+        }
+    }
+
+    private fun loadMatchForEdit(details: MatchWithDetails) {
+        val match = details.match
+        selectedGame = details.game
+        actvSelectGame.setText(details.game.name, false)
+        onGameSelected()
+
+        selectedExpansions.clear()
+        match.usedExpansions?.let { selectedExpansions.addAll(it) }
+        updateExpansionsChips()
+
+        swIsTeamGame.isChecked = match.isTeamGame
+        llParticipantsContainer.removeAllViews()
+
+        if (match.isTeamGame) {
+            details.teams.forEach { team ->
+                addTeamForEdit(team, details.players.filter { it.teamName == team.teamName })
+            }
+        } else {
+            details.players.forEach { p ->
+                addPlayerForEdit(llParticipantsContainer, p)
+            }
+        }
+    }
+
+    private fun addTeamForEdit(team: MatchTeam, teamPlayers: List<MatchPlayer>) {
+        val teamView = LayoutInflater.from(requireContext()).inflate(R.layout.item_add_team, llParticipantsContainer, false)
+        val actvTeamName = teamView.findViewById<AutoCompleteTextView>(R.id.actvTeamName)
+        val etTeamScore = teamView.findViewById<EditText>(R.id.etTeamScore)
+        val btnRemoveTeam = teamView.findViewById<ImageButton>(R.id.btnRemoveTeam)
+        val btnAddPlayerToTeam = teamView.findViewById<Button>(R.id.btnAddPlayerToTeam)
+        val llTeamPlayersContainer = teamView.findViewById<LinearLayout>(R.id.llTeamPlayersContainer)
+
+        actvTeamName.setText(team.teamName)
+        etTeamScore.setText(team.score.toString())
+
+        val teams = selectedGame?.teams ?: emptyList()
+        if (teams.isNotEmpty()) {
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, teams)
+            actvTeamName.setAdapter(adapter)
+        }
+
+        btnRemoveTeam.setOnClickListener { llParticipantsContainer.removeView(teamView) }
+        btnAddPlayerToTeam.setOnClickListener { addPlayerView(llTeamPlayersContainer, isInsideTeam = true) }
+
+        llParticipantsContainer.addView(teamView)
+        teamPlayers.forEach { p ->
+            addPlayerForEdit(llTeamPlayersContainer, p, isInsideTeam = true)
+        }
+    }
+
+    private fun addPlayerForEdit(container: LinearLayout, p: MatchPlayer, isInsideTeam: Boolean = false) {
+        val playerView = LayoutInflater.from(requireContext()).inflate(R.layout.item_add_player, container, false)
+        val actvPlayerName = playerView.findViewById<AutoCompleteTextView>(R.id.actvPlayerName)
+        val btnRemovePlayer = playerView.findViewById<ImageButton>(R.id.btnRemovePlayer)
+        val etScore = playerView.findViewById<EditText>(R.id.etPlayerScore)
+        val etTurn = playerView.findViewById<EditText>(R.id.etPlayerTurn)
+        val btnSelectPlayerRules = playerView.findViewById<Button>(R.id.btnSelectPlayerRules)
+        val cgPlayerRules = playerView.findViewById<ChipGroup>(R.id.cgPlayerRules)
+
+        val player = allPlayers.find { it.id == p.playerId }
+        actvPlayerName.setText(player?.name ?: "")
+        
+        if (!isInsideTeam) {
+            etScore.setText(p.score?.toString() ?: "")
+        } else {
+            playerView.findViewById<View>(R.id.tilPlayerScore)?.visibility = View.GONE
+        }
+        
+        etTurn.setText(p.turn?.toString() ?: "")
+        
+        val selectedPlayerRules = mutableListOf<String>()
+        p.playerRules?.let { selectedPlayerRules.addAll(it) }
+        playerView.tag = selectedPlayerRules
+        updatePlayerRulesChips(cgPlayerRules, selectedPlayerRules)
+
+        val playerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, allPlayers.map { it.name })
+        actvPlayerName.setAdapter(playerAdapter)
+
+        btnSelectPlayerRules.setOnClickListener {
+            val rules = selectedGame?.specialRules?.toTypedArray() ?: return@setOnClickListener
+            val checkedItems = rules.map { selectedPlayerRules.contains(it) }.toBooleanArray()
+            AlertDialog.Builder(requireContext())
+                .setTitle("Seleccionar Reglas/Roles")
+                .setMultiChoiceItems(rules, checkedItems) { _, which, isChecked ->
+                    if (isChecked) selectedPlayerRules.add(rules[which]) else selectedPlayerRules.remove(rules[which])
+                }
+                .setPositiveButton("Aceptar") { _, _ -> updatePlayerRulesChips(cgPlayerRules, selectedPlayerRules) }
+                .setNegativeButton("Cancelar", null)
+                .show()
+        }
+
+        btnRemovePlayer.setOnClickListener { container.removeView(playerView) }
+        container.addView(playerView)
     }
 
     private fun onGameSelected() {
@@ -254,6 +381,7 @@ class AddMatchFragment : Fragment() {
         }
 
         val match = Match(
+            id = matchId ?: java.util.UUID.randomUUID().toString(),
             gameId = game.id,
             usedExpansions = if (selectedExpansions.isNotEmpty()) selectedExpansions.toList() else null,
             isTeamGame = swIsTeamGame.isChecked

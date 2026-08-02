@@ -55,6 +55,22 @@ class MatchDetailFragment : Fragment() {
         llResultsContainer = view.findViewById(R.id.llResultsContainer)
         ivGameImage = view.findViewById(R.id.ivDetailGameImage)
 
+        view.findViewById<Button>(R.id.btnEditMatch)?.setOnClickListener {
+            matchId?.let { id ->
+                val fragment = AddMatchFragment.newInstance(id)
+                parentFragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                    )
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
+
         view.findViewById<Button>(R.id.btnDeleteMatch)?.setOnClickListener {
             currentDetails?.match?.let { match ->
                 AlertDialog.Builder(requireContext())
@@ -84,6 +100,17 @@ class MatchDetailFragment : Fragment() {
         }
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        matchId?.let { id ->
+            lifecycleScope.launch {
+                val details = viewModel.getMatchWithDetails(id)
+                currentDetails = details
+                refreshDetails()
+            }
+        }
     }
 
     private var currentDetails: MatchWithDetails? = null
