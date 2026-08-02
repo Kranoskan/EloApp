@@ -67,6 +67,10 @@ class AddMatchFragment : Fragment() {
         btnAddParticipant = view.findViewById(R.id.btnAddParticipant)
         btnSaveMatch = view.findViewById(R.id.btnSaveMatch)
 
+        view.findViewById<ImageButton>(R.id.btnClose)?.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         viewModel.games.observe(viewLifecycleOwner) { games ->
             allGames = games
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, games.map { it.name })

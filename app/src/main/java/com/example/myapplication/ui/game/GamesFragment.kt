@@ -94,10 +94,15 @@ class GamesFragment : Fragment() {
         val etExpansions = dialogView.findViewById<EditText>(R.id.etExpansions)
         val etSpecialRules = dialogView.findViewById<EditText>(R.id.etSpecialRules)
         val btnAdd = dialogView.findViewById<Button>(R.id.btnAddGame)
+        val btnClose = dialogView.findViewById<ImageButton>(R.id.btnClose)
 
         val dialog = AlertDialog.Builder(requireContext(), R.style.Theme_MeepleForce)
             .setView(dialogView)
             .create()
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
 
         cbHasTeams.setOnCheckedChangeListener { _, isChecked ->
             tilTeams.visibility = if (isChecked) View.VISIBLE else View.GONE

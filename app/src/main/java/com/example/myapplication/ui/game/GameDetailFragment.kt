@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -134,6 +135,10 @@ class GameDetailFragment : Fragment() {
                 currentExpansions.add(newExpansion)
                 updateAndRefresh(currentGame.copy(expansions = currentExpansions))
             }
+        }
+
+        view.findViewById<ImageButton>(R.id.btnClose)?.setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
 
         // 6. Eliminar juego

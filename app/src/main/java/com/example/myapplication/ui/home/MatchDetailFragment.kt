@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -54,6 +55,10 @@ class MatchDetailFragment : Fragment() {
         tvExpansions = view.findViewById(R.id.tvDetailExpansions)
         llResultsContainer = view.findViewById(R.id.llResultsContainer)
         ivGameImage = view.findViewById(R.id.ivDetailGameImage)
+
+        view.findViewById<ImageButton>(R.id.btnClose)?.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
         view.findViewById<Button>(R.id.btnEditMatch)?.setOnClickListener {
             matchId?.let { id ->

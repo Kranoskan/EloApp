@@ -1,217 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:overScrollMode="never">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:background="?attr/android:windowBackground"
-        android:gravity="center_horizontal">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
-        <!-- Imagen tipo Token - Pulsable para cambiar foto -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="240dp"
-            android:layout_height="220dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="10dp"
-            app:strokeWidth="3dp"
-            app:strokeColor="?attr/colorSecondary"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground">
-
-            <ImageView
-                android:id="@+id/ivGameDetailImage"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_meeple"/>
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Púlsala para cambiar de portada"
-            android:textSize="11sp"
-            android:textColor="?attr/colorPrimary"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:id="@+id/tvGameTitleDetail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Título del Juego"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="12dp"
-            android:textAlignment="center"/>
-
-        <!-- Distintivo/Token de jugadores (Configurado como botón interactivo) -->
-        <TextView
-            android:id="@+id/tvMaxPlayersDetail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Máx. Jugadores: Sin especificar"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface"
-            android:background="@drawable/bg_board_game_token"
-            android:paddingHorizontal="20dp"
-            android:paddingVertical="10dp"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"/>
-
-        <TextView
-            android:id="@+id/tvTotalMatchesDetail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Total Partidas: 0"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface"
-            android:background="@drawable/bg_board_game_token"
-            android:paddingHorizontal="20dp"
-            android:paddingVertical="10dp"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Sección: Turnos -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="20dp">
+            android:padding="24dp"
+            android:background="?attr/android:windowBackground"
+            android:gravity="center_horizontal">
 
-            <TextView
-                android:id="@+id/tvTurnsHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="⚔️ Turnos ⚙️"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"
-                android:padding="8dp"
-                android:background="?attr/colorSurfaceVariant"
+            <!-- Imagen tipo Token - Pulsable para cambiar foto -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="240dp"
+                android:layout_height="220dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="10dp"
+                app:strokeWidth="3dp"
+                app:strokeColor="?attr/colorSecondary"
+                android:layout_marginBottom="12dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:layout_marginBottom="6dp"/>
+                android:foreground="?android:attr/selectableItemBackground">
 
+                <ImageView
+                    android:id="@+id/ivGameDetailImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_meeple"/>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Púlsala para cambiar de portada"
+                android:textSize="11sp"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/tvGameTitleDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Título del Juego"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="12dp"
+                android:textAlignment="center"/>
+
+            <!-- Distintivo/Token de jugadores (Configurado como botón interactivo) -->
+            <TextView
+                android:id="@+id/tvMaxPlayersDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Máx. Jugadores: Sin especificar"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
+                android:background="@drawable/bg_board_game_token"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"/>
+
+            <TextView
+                android:id="@+id/tvTotalMatchesDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Partidas: 0"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
+                android:background="@drawable/bg_board_game_token"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- Sección: Turnos -->
             <LinearLayout
-                android:id="@+id/llTurnsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="8dp"/>
-        </LinearLayout>
+                android:layout_marginBottom="20dp">
 
-        <!-- Sección: Equipos -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="20dp">
+                <TextView
+                    android:id="@+id/tvTurnsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚔️ Turnos ⚙️"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:padding="8dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:layout_marginBottom="6dp"/>
 
-            <TextView
-                android:id="@+id/tvTeamsHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="👥 Equipos ➕"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"
-                android:padding="8dp"
-                android:background="?attr/colorSurfaceVariant"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:layout_marginBottom="6dp"/>
+                <LinearLayout
+                    android:id="@+id/llTurnsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="8dp"/>
+            </LinearLayout>
 
+            <!-- Sección: Equipos -->
             <LinearLayout
-                android:id="@+id/llTeamsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="8dp"/>
-        </LinearLayout>
+                android:layout_marginBottom="20dp">
 
-        <!-- Sección: Reglas Especiales -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="20dp">
+                <TextView
+                    android:id="@+id/tvTeamsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="👥 Equipos ➕"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:padding="8dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:layout_marginBottom="6dp"/>
 
-            <TextView
-                android:id="@+id/tvRulesHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="📜 Modificadores de Reglas/Roles ➕"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"
-                android:padding="8dp"
-                android:background="?attr/colorSurfaceVariant"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:layout_marginBottom="6dp"/>
+                <LinearLayout
+                    android:id="@+id/llTeamsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="8dp"/>
+            </LinearLayout>
 
+            <!-- Sección: Reglas Especiales -->
             <LinearLayout
-                android:id="@+id/llRulesContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="8dp"/>
-        </LinearLayout>
+                android:layout_marginBottom="20dp">
 
-        <!-- Sección: Expansiones y Mapas -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="16dp">
+                <TextView
+                    android:id="@+id/tvRulesHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📜 Modificadores de Reglas/Roles ➕"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:padding="8dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:layout_marginBottom="6dp"/>
 
-            <TextView
-                android:id="@+id/tvExpansionsHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🗺️ Expansiones y Mapas ➕"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"
-                android:padding="8dp"
-                android:background="?attr/colorSurfaceVariant"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:layout_marginBottom="6dp"/>
+                <LinearLayout
+                    android:id="@+id/llRulesContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="8dp"/>
+            </LinearLayout>
 
+            <!-- Sección: Expansiones y Mapas -->
             <LinearLayout
-                android:id="@+id/llExpansionsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="8dp"/>
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:id="@+id/tvExpansionsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🗺️ Expansiones y Mapas ➕"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:padding="8dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:layout_marginBottom="6dp"/>
+
+                <LinearLayout
+                    android:id="@+id/llExpansionsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="8dp"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnDeleteGame"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ELIMINAR JUEGO"
+                android:textColor="@color/meeple_red_light"
+                android:layout_marginTop="16dp"/>
+
         </LinearLayout>
+    </ScrollView>
 
-        <Button
-            android:id="@+id/btnDeleteGame"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="ELIMINAR JUEGO"
-            android:textColor="@color/meeple_red_light"
-            android:layout_marginTop="16dp"/>
-
-    </LinearLayout>
-</ScrollView>
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="12dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="?attr/colorPrimary"
+        android:contentDescription="Cerrar"
+        android:padding="12dp"/>
+</FrameLayout>

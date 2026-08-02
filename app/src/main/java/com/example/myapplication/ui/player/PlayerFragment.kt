@@ -132,12 +132,18 @@ class PlayerFragment : Fragment() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_player, null)
         val etName = dialogView.findViewById<EditText>(R.id.etPlayerName)
         val btnSelectImage = dialogView.findViewById<Button>(R.id.btnSelectPlayerImage)
-        ivDialogPreview = dialogView.findViewById(R.id.ivSelectedPlayerImage)
+        val ivDialogPreview = dialogView.findViewById<ImageView>(R.id.ivSelectedPlayerImage)
+        this.ivDialogPreview = ivDialogPreview
         val btnAdd = dialogView.findViewById<Button>(R.id.btnAddPlayer)
+        val btnClose = dialogView.findViewById<ImageButton>(R.id.btnClose)
 
         val dialog = AlertDialog.Builder(requireContext(), R.style.Theme_MeepleForce)
             .setView(dialogView)
             .create()
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
 
         btnSelectImage.setOnClickListener {
             pickImageLauncher.launch("image/*")

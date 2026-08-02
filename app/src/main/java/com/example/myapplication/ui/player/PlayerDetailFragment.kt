@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -105,6 +106,10 @@ class PlayerDetailFragment : Fragment() {
             showEditPlayerDialog()
         }
 
+        view.findViewById<ImageButton>(R.id.btnClose)?.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         view.findViewById<Button>(R.id.btnDeletePlayer)?.setOnClickListener {
             player?.let { p ->
                 AlertDialog.Builder(requireContext())
@@ -124,8 +129,10 @@ class PlayerDetailFragment : Fragment() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_player, null)
         val etName = dialogView.findViewById<EditText>(R.id.etPlayerName)
         val btnSelectImage = dialogView.findViewById<Button>(R.id.btnSelectPlayerImage)
-        ivDialogPreview = dialogView.findViewById(R.id.ivSelectedPlayerImage)
+        val ivDialogPreview = dialogView.findViewById<ImageView>(R.id.ivSelectedPlayerImage)
+        this.ivDialogPreview = ivDialogPreview
         val btnSave = dialogView.findViewById<Button>(R.id.btnAddPlayer)
+        val btnClose = dialogView.findViewById<ImageButton>(R.id.btnClose)
         val tvTitle = dialogView.findViewById<TextView>(android.R.id.title) // We didn't give it an ID, but we can change the text of the button
 
         btnSave.text = "GUARDAR CAMBIOS"
@@ -140,6 +147,10 @@ class PlayerDetailFragment : Fragment() {
             .setTitle("Editar Jugador")
             .setView(dialogView)
             .create()
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
 
         btnSelectImage.setOnClickListener {
             pickImageLauncher.launch("image/*")
