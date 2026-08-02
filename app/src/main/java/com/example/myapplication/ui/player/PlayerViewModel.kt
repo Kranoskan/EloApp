@@ -45,21 +45,35 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             matches.groupBy { it.game.id }.map { (gameId, matchDetailsList) ->
                 val rating = ratings.find { it.gameId == gameId }
                 
-                val wins = matchDetailsList.count { detail ->
+                val winPoints = matchDetailsList.sumOf { detail ->
                     if (detail.match.isTeamGame) {
                         val playerInMatch = detail.players.find { it.playerId == playerId }
                         val playerTeam = detail.teams.find { it.teamName == playerInMatch?.teamName }
-                        val maxTeamScore = detail.teams.maxOfOrNull { it.score }
-                        playerTeam != null && maxTeamScore != null && playerTeam.score == maxTeamScore
+                        val teamScores = detail.teams.map { it.score }
+                        val maxTeamScore = teamScores.maxOrNull()
+                        val minTeamScore = teamScores.minOrNull()
+                        
+                        if (playerTeam != null && maxTeamScore != null && minTeamScore != null) {
+                            if (maxTeamScore == minTeamScore) 0.5 
+                            else if (playerTeam.score == maxTeamScore) 1.0 
+                            else 0.0
+                        } else 0.0
                     } else {
                         val playerScore = detail.players.find { it.playerId == playerId }?.score
-                        val maxPlayerScore = detail.players.maxOfOrNull { it.score ?: Int.MIN_VALUE }
-                        playerScore != null && maxPlayerScore != null && playerScore == maxPlayerScore
+                        val playerScores = detail.players.mapNotNull { it.score }
+                        val maxPlayerScore = playerScores.maxOrNull()
+                        val minPlayerScore = playerScores.minOrNull()
+                        
+                        if (playerScore != null && maxPlayerScore != null && minPlayerScore != null) {
+                            if (maxPlayerScore == minPlayerScore) 0.5 
+                            else if (playerScore == maxPlayerScore) 1.0 
+                            else 0.0
+                        } else 0.0
                     }
                 }
                 
                 val totalMatches = matchDetailsList.size
-                val winProb = if (totalMatches > 0) wins.toDouble() / totalMatches else 0.0
+                val winProb = if (totalMatches > 0) winPoints / totalMatches else 0.0
 
                 PlayerGameStats(
                     gameName = matchDetailsList.first().game.name,
