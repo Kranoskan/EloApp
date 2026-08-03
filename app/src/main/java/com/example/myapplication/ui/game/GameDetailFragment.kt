@@ -158,9 +158,10 @@ class GameDetailFragment : Fragment() {
     private fun renderGameData(game: Game, attributeRatings: List<AttributeRating> = emptyList()) {
         tvTitle.text = game.name
 
-        if (game.imageUri != null) {
+        val portableUri = FileUtils.getPortableUri(requireContext(), game.imageUri)
+        if (portableUri != null) {
             try {
-                ivImage.setImageURI(Uri.parse(game.imageUri))
+                ivImage.setImageURI(portableUri)
                 ivImage.colorFilter = null
                 ivImage.setPadding(0, 0, 0, 0)
             } catch (e: SecurityException) {

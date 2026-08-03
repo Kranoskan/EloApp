@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.util.FileUtils
 import com.example.myapplication.R
 import com.example.myapplication.ui.game.Match
 import com.example.myapplication.ui.game.MatchWithGame
@@ -66,9 +67,10 @@ class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
         tvMatchDate.text = sdf.format(Date(match.date))
 
-        if (game.imageUri != null) {
+        val portableUri = FileUtils.getPortableUri(itemView.context, game.imageUri)
+        if (portableUri != null) {
             try {
-                ivMatchGame.setImageURI(android.net.Uri.parse(game.imageUri))
+                ivMatchGame.setImageURI(portableUri)
                 ivMatchGame.colorFilter = null
                 ivMatchGame.imageTintList = null
                 ivMatchGame.setPadding(0, 0, 0, 0)

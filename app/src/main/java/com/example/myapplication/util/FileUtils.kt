@@ -24,4 +24,25 @@ object FileUtils {
             null
         }
     }
+
+    /**
+     * Resuelve un URI guardado de forma que sea portable entre dispositivos.
+     * Si la ruta absoluta guardada no existe (por ejemplo, al restaurar en otro dispositivo),
+     * intenta buscar el archivo por nombre en el directorio de archivos interno actual.
+     */
+    fun getPortableUri(context: Context, uriString: String?): Uri? {
+        if (uriString == null) return null
+        val uri = Uri.parse(uriString)
+        if (uri.scheme == "file") {
+            val file = File(uri.path ?: "")
+            if (!file.exists()) {
+                val fileName = file.name
+                val localFile = File(context.filesDir, fileName)
+                if (localFile.exists()) {
+                    return Uri.fromFile(localFile)
+                }
+            }
+        }
+        return uri
+    }
 }

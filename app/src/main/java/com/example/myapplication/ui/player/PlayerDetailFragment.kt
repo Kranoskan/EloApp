@@ -91,9 +91,10 @@ class PlayerDetailFragment : Fragment() {
     private fun setupUI(view: View) {
         player?.let { p ->
             tvPlayerName.text = p.name
-            if (p.imageUri != null) {
+            val portableUri = FileUtils.getPortableUri(requireContext(), p.imageUri)
+            if (portableUri != null) {
                 try {
-                    ivPlayer.setImageURI(Uri.parse(p.imageUri))
+                    ivPlayer.setImageURI(portableUri)
                 } catch (e: SecurityException) {
                     ivPlayer.setImageResource(R.drawable.ic_launcher_foreground)
                 }

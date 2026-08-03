@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import java.util.Locale
 
+import com.example.myapplication.util.FileUtils
+
 class PlayerAdapter(
     private var players: List<PlayerWithStrength>,
     private val onItemSelected: (Player) -> Unit
@@ -42,9 +44,10 @@ class PlayerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         tvPlayerName.text = player.name
         tvPlayerStrength.text = String.format(Locale.getDefault(), "Fuerza: %.0f", item.averageStrength)
 
-        if (player.imageUri != null) {
+        val portableUri = FileUtils.getPortableUri(itemView.context, player.imageUri)
+        if (portableUri != null) {
             try {
-                ivPlayer.setImageURI(Uri.parse(player.imageUri))
+                ivPlayer.setImageURI(portableUri)
             } catch (e: SecurityException) {
                 ivPlayer.setImageResource(R.drawable.ic_launcher_foreground)
             }

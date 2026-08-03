@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import java.util.Locale
 
+import com.example.myapplication.util.FileUtils
+
 class PlayerGameStatsAdapter : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewHolder>() {
 
     private var stats: List<PlayerGameStats> = emptyList()
@@ -41,9 +43,10 @@ class PlayerGameStatsAdapter : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewH
             tvWinProb.text = String.format(Locale.getDefault(), "Prob. Victoria: %.0f%%", stat.winProbability * 100)
             tvMatches.text = "Partidas: ${stat.matchesPlayed}"
 
-            if (stat.gameImageUri != null) {
+            val portableUri = FileUtils.getPortableUri(itemView.context, stat.gameImageUri)
+            if (portableUri != null) {
                 try {
-                    ivGameImage.setImageURI(android.net.Uri.parse(stat.gameImageUri))
+                    ivGameImage.setImageURI(portableUri)
                     ivGameImage.colorFilter = null
                     ivGameImage.imageTintList = null
                     ivGameImage.setPadding(0, 0, 0, 0)

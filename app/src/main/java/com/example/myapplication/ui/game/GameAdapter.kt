@@ -9,6 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 
+import com.example.myapplication.util.FileUtils
+
 class GameAdapter(
     private var games: List<Game>,
     private val onItemSelected: (Game) -> Unit
@@ -37,9 +39,10 @@ class GameViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     fun render(game: Game, onItemSelected: (Game) -> Unit) {
         tvGameTitle.text = game.name
-        if (game.imageUri != null) {
+        val portableUri = FileUtils.getPortableUri(itemView.context, game.imageUri)
+        if (portableUri != null) {
             try {
-                ivGameImage.setImageURI(Uri.parse(game.imageUri))
+                ivGameImage.setImageURI(portableUri)
                 ivGameImage.setPadding(0, 0, 0, 0)
                 ivGameImage.colorFilter = null
             } catch (e: SecurityException) {

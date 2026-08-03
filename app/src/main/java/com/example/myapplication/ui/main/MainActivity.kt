@@ -136,11 +136,21 @@ class MainActivity : AppCompatActivity() {
                 val dbFile = getDatabasePath(dbName)
                 val dbShm = File(dbFile.path + "-shm")
                 val dbWal = File(dbFile.path + "-wal")
+                
+                // Incluir también las imágenes guardadas en el almacenamiento interno
+                val imageFiles = filesDir.listFiles { _, name -> 
+                    name.startsWith("img_") 
+                }?.toList() ?: emptyList()
 
-                val filesToZip = listOf(dbFile, dbShm, dbWal)
+                val filesToZip = mutableListOf(dbFile, dbShm, dbWal)
+                filesToZip.addAll(imageFiles)
+                
                 val zipFile = File(cacheDir, "meepleforce_backup.zip")
 
-                ZipUtils.zip(filesToZip, zipFile)
+                // Usamos el directorio padre de filesDir (el directorio de datos de la app)
+                // como base para mantener la estructura de subcarpetas databases/ y files/
+                val baseDir = filesDir.parentFile
+                ZipUtils.zip(filesToZip, zipFile, baseDir)
 
                 val contentUri = FileProvider.getUriForFile(
                     this@MainActivity,
@@ -185,9 +195,14 @@ class MainActivity : AppCompatActivity() {
                 dbFile.delete()
                 dbShm.delete()
                 dbWal.delete()
+                
+                // Opcional: limpiar imágenes actuales antes de restaurar
+                filesDir.listFiles { _, name -> name.startsWith("img_") }?.forEach { it.delete() }
 
                 contentResolver.openInputStream(uri)?.use { inputStream ->
-                    ZipUtils.unzip(inputStream, dbFile.parentFile!!)
+                    // Unzip en el directorio base de la aplicación para que las carpetas 
+                    // databases/ y files/ se restauren en su lugar correcto
+                    ZipUtils.unzip(inputStream, filesDir.parentFile!!)
                 }
 
                 withContext(Dispatchers.Main) {

@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.util.FileUtils
 import com.example.myapplication.R
 import com.example.myapplication.ui.game.MatchWithDetails
 import kotlinx.coroutines.launch
@@ -135,9 +136,10 @@ class MatchDetailFragment : Fragment() {
         val game = viewModel.games.value?.find { it.id == match.gameId }
         tvGameName.text = game?.name ?: "Juego Desconocido"
 
-        if (game?.imageUri != null) {
+        val portableUri = FileUtils.getPortableUri(requireContext(), game?.imageUri)
+        if (portableUri != null) {
             try {
-                ivGameImage.setImageURI(android.net.Uri.parse(game.imageUri))
+                ivGameImage.setImageURI(portableUri)
                 ivGameImage.colorFilter = null
                 ivGameImage.imageTintList = null
                 ivGameImage.setPadding(0, 0, 0, 0)
