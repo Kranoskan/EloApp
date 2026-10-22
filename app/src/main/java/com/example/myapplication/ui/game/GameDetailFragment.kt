@@ -17,7 +17,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.myapplication.R
-import com.example.myapplication.ui.player.PlayerGameDetailFragment
 import com.example.myapplication.util.FileUtils
 
 class GameDetailFragment : Fragment() {
@@ -38,8 +37,6 @@ class GameDetailFragment : Fragment() {
     private lateinit var tvRulesHeader: TextView
     private lateinit var llExpansionsContainer: LinearLayout
     private lateinit var tvExpansionsHeader: TextView
-    private lateinit var llPlayersContainer: LinearLayout
-    private lateinit var tvPlayersHeader: TextView
 
     // Contratos de galería para cambiar la foto desde el detalle
     private val changeImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -84,17 +81,11 @@ class GameDetailFragment : Fragment() {
         tvRulesHeader = view.findViewById(R.id.tvRulesHeader)
         llExpansionsContainer = view.findViewById(R.id.llExpansionsContainer)
         tvExpansionsHeader = view.findViewById(R.id.tvExpansionsHeader)
-        llPlayersContainer = view.findViewById(R.id.llPlayersContainer)
-        tvPlayersHeader = view.findViewById(R.id.tvPlayersHeader)
 
         setupListeners(view)
-        
+
         viewModel.getAttributesForGame(currentGame.id).observe(viewLifecycleOwner) { ratings ->
             renderGameData(currentGame, ratings)
-        }
-
-        viewModel.getPlayerRatingsForGame(currentGame.id).observe(viewLifecycleOwner) { playerRatings ->
-            renderPlayerRatings(playerRatings)
         }
 
         observeMatchCount()
@@ -246,40 +237,6 @@ class GameDetailFragment : Fragment() {
         }
     }
 
-    private fun renderPlayerRatings(playerRatings: List<GamesViewModel.PlayerRatingWithPlayer>) {
-        tvPlayersHeader.text = "🏆 Ranking"
-        tvPlayersHeader.visibility = View.VISIBLE
-        llPlayersContainer.removeAllViews()
-        if (playerRatings.isNotEmpty()) {
-            playerRatings.forEach { item ->
-                addInfoItem(
-                    container = llPlayersContainer,
-                    title = item.player.name,
-                    icon = "👤",
-                    isDeletable = false,
-                    strength = item.rating.strength,
-                    showStat = true,
-                    onClicked = {
-                        val fragment = PlayerGameDetailFragment.newInstance(item.player.id, currentGame.id)
-                        parentFragmentManager.beginTransaction()
-                            .setCustomAnimations(
-                                R.anim.slide_in_right,
-                                R.anim.slide_out_left,
-                                R.anim.slide_in_left,
-                                R.anim.slide_out_right
-                            )
-                            .replace(R.id.fragment_container, fragment)
-                            .addToBackStack(null)
-                            .commit()
-                    }
-                ) {}
-            }
-        } else {
-            tvPlayersHeader.text = "🏆 Ranking"
-            addPlaceholderItem(llPlayersContainer, "Ningún jugador ha jugado a este juego aún.")
-        }
-    }
-
     // Encapsula la actualización del ViewModel y refresca la UI actual
     private fun updateAndRefresh(updatedGame: Game) {
         currentGame = updatedGame
@@ -297,7 +254,6 @@ class GameDetailFragment : Fragment() {
         isDeletable: Boolean,
         strength: Double = 0.0,
         showStat: Boolean = true,
-        onClicked: (() -> Unit)? = null,
         onDeleted: () -> Unit
     ) {
         val itemView = LayoutInflater.from(context).inflate(R.layout.item_detail_token, container, false)
@@ -318,17 +274,6 @@ class GameDetailFragment : Fragment() {
             tvStat.visibility = View.VISIBLE
         } else {
             tvStat.visibility = View.GONE
-        }
-
-        if (onClicked != null) {
-            itemView.setOnClickListener { onClicked() }
-            itemView.isClickable = true
-            itemView.isFocusable = true
-            context?.let { ctx ->
-                val typedArray = ctx.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
-                itemView.background = typedArray.getDrawable(0)
-                typedArray.recycle()
-            }
         }
 
         if (isDeletable) {
