@@ -4,38 +4,83 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.CalendarView
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.ui.game.Match
+import com.example.myapplication.ui.game.MatchWithGame
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
     private val viewModel: MatchViewModel by activityViewModels()
+    
     private lateinit var rvMatches: RecyclerView
-    private lateinit var matchAdapter: MatchAdapter
+    private lateinit var llCalendarContainer: LinearLayout
+    private lateinit var calendarView: CalendarView
+    private lateinit var tvSelectedDateHeader: TextView
+    private lateinit var tvNoMatchesCalendar: TextView
+    private lateinit var rvCalendarMatches: RecyclerView
+    private lateinit var ibToggleView: ImageButton
     private lateinit var fabAddMatch: FloatingActionButton
+
+    private lateinit var matchAdapter: MatchAdapter
+    private lateinit var calendarMatchAdapter: MatchAdapter
+
+    private var allMatches: List<MatchWithGame> = emptyList()
+    private var isCalendarMode = false
+
+    private var selectedYear = Calendar.getInstance().get(Calendar.YEAR)
+    private var selectedMonth = Calendar.getInstance().get(Calendar.MONTH)
+    private var selectedDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
+        
         rvMatches = view.findViewById(R.id.rvMatches)
+        llCalendarContainer = view.findViewById(R.id.llCalendarContainer)
+        calendarView = view.findViewById(R.id.calendarView)
+        tvSelectedDateHeader = view.findViewById(R.id.tvSelectedDateHeader)
+        tvNoMatchesCalendar = view.findViewById(R.id.tvNoMatchesCalendar)
+        rvCalendarMatches = view.findViewById(R.id.rvCalendarMatches)
+        ibToggleView = view.findViewById(R.id.ibToggleView)
         fabAddMatch = view.findViewById(R.id.fabAddMatch)
         
-        matchAdapter = MatchAdapter { match ->
-            navigateToDetail(match)
-        }
+        matchAdapter = MatchAdapter { match -> navigateToDetail(match) }
+        calendarMatchAdapter = MatchAdapter { match -> navigateToDetail(match) }
         
         rvMatches.layoutManager = LinearLayoutManager(context)
         rvMatches.adapter = matchAdapter
 
+        rvCalendarMatches.layoutManager = LinearLayoutManager(context)
+        rvCalendarMatches.adapter = calendarMatchAdapter
+
+        ibToggleView.setOnClickListener {
+            toggleViewMode()
+        }
+
+        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            selectedYear = year
+            selectedMonth = month
+            selectedDay = dayOfMonth
+            updateCalendarMatches()
+        }
+
         viewModel.matches.observe(viewLifecycleOwner) { matches ->
+            allMatches = matches
             matchAdapter.updateList(matches)
+            if (isCalendarMode) {
+                updateCalendarMatches()
+            }
         }
 
         fabAddMatch.setOnClickListener {
@@ -43,6 +88,46 @@ class HomeFragment : Fragment() {
         }
         
         return view
+    }
+
+    private fun toggleViewMode() {
+        isCalendarMode = !isCalendarMode
+        if (isCalendarMode) {
+            ibToggleView.setImageResource(R.drawable.ic_list)
+            rvMatches.visibility = View.GONE
+            llCalendarContainer.visibility = View.VISIBLE
+            updateCalendarMatches()
+        } else {
+            ibToggleView.setImageResource(R.drawable.ic_calendar)
+            llCalendarContainer.visibility = View.GONE
+            rvMatches.visibility = View.VISIBLE
+        }
+    }
+
+    private fun updateCalendarMatches() {
+        val filtered = allMatches.filter { matchWithGame ->
+            isSameDay(matchWithGame.match.date, selectedYear, selectedMonth, selectedDay)
+        }
+        
+        val dateStr = String.format("%02d/%02d/%04d", selectedDay, selectedMonth + 1, selectedYear)
+        tvSelectedDateHeader.text = "Partidas del $dateStr"
+
+        calendarMatchAdapter.updateList(filtered)
+
+        if (filtered.isEmpty()) {
+            tvNoMatchesCalendar.visibility = View.VISIBLE
+            rvCalendarMatches.visibility = View.GONE
+        } else {
+            tvNoMatchesCalendar.visibility = View.GONE
+            rvCalendarMatches.visibility = View.VISIBLE
+        }
+    }
+
+    private fun isSameDay(timestamp: Long, year: Int, month: Int, dayOfMonth: Int): Boolean {
+        val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
+        return cal.get(Calendar.YEAR) == year &&
+               cal.get(Calendar.MONTH) == month &&
+               cal.get(Calendar.DAY_OF_MONTH) == dayOfMonth
     }
 
     private fun navigateToAddMatch() {

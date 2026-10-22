@@ -70,7 +70,21 @@ class PlayerDetailFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        statsAdapter = PlayerGameStatsAdapter()
+        statsAdapter = PlayerGameStatsAdapter { gameId ->
+            player?.let { p ->
+                val fragment = PlayerGameDetailFragment.newInstance(p.id, gameId)
+                parentFragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                    )
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
         rvStats.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = statsAdapter

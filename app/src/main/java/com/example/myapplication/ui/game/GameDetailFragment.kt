@@ -37,6 +37,8 @@ class GameDetailFragment : Fragment() {
     private lateinit var tvRulesHeader: TextView
     private lateinit var llExpansionsContainer: LinearLayout
     private lateinit var tvExpansionsHeader: TextView
+    private lateinit var llPlayersContainer: LinearLayout
+    private lateinit var tvPlayersHeader: TextView
 
     // Contratos de galería para cambiar la foto desde el detalle
     private val changeImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -81,11 +83,17 @@ class GameDetailFragment : Fragment() {
         tvRulesHeader = view.findViewById(R.id.tvRulesHeader)
         llExpansionsContainer = view.findViewById(R.id.llExpansionsContainer)
         tvExpansionsHeader = view.findViewById(R.id.tvExpansionsHeader)
+        llPlayersContainer = view.findViewById(R.id.llPlayersContainer)
+        tvPlayersHeader = view.findViewById(R.id.tvPlayersHeader)
 
         setupListeners(view)
         
         viewModel.getAttributesForGame(currentGame.id).observe(viewLifecycleOwner) { ratings ->
             renderGameData(currentGame, ratings)
+        }
+
+        viewModel.getPlayerRatingsForGame(currentGame.id).observe(viewLifecycleOwner) { playerRatings ->
+            renderPlayerRatings(playerRatings)
         }
 
         observeMatchCount()
@@ -234,6 +242,25 @@ class GameDetailFragment : Fragment() {
             }
         } else {
             addPlaceholderItem(llExpansionsContainer, "Sin expansiones ni mapas. (Pulsa el encabezado para añadir)")
+        }
+    }
+
+    private fun renderPlayerRatings(playerRatings: List<GamesViewModel.PlayerRatingWithPlayer>) {
+        tvPlayersHeader.visibility = View.VISIBLE
+        llPlayersContainer.removeAllViews()
+        if (playerRatings.isNotEmpty()) {
+            playerRatings.forEach { item ->
+                addInfoItem(
+                    container = llPlayersContainer,
+                    title = item.player.name,
+                    icon = "👤",
+                    isDeletable = false,
+                    strength = item.rating.strength,
+                    showStat = true
+                ) {}
+            }
+        } else {
+            addPlaceholderItem(llPlayersContainer, "Ningún jugador ha jugado a este juego aún.")
         }
     }
 

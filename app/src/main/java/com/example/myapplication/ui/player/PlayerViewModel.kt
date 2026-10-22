@@ -7,10 +7,12 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.ui.game.AppDatabase
+import com.example.myapplication.ui.game.Game
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 data class PlayerGameStats(
+    val gameId: String,
     val gameName: String,
     val gameImageUri: String? = null,
     val strength: Int = 1200,
@@ -18,10 +20,21 @@ data class PlayerGameStats(
     val matchesPlayed: Int
 )
 
+data class PlayerGameDetailData(
+    val player: Player,
+    val game: Game,
+    val matchesPlayed: Int,
+    val turnCounts: List<Pair<String, Int>>,
+    val teamCounts: List<Pair<String, Int>>,
+    val ruleCounts: List<Pair<String, Int>>,
+    val expansionCounts: List<Pair<String, Int>>
+)
+
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val playerDao = AppDatabase.getDatabase(application).playerDao()
     private val matchDao = AppDatabase.getDatabase(application).matchDao()
+    private val gameDao = AppDatabase.getDatabase(application).gameDao()
 
     val players = playerDao.getAllPlayers().asLiveData()
     val allRatings = playerDao.getAllRatings().asLiveData()
@@ -76,6 +89,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                 val winProb = if (totalMatches > 0) winPoints / totalMatches else 0.0
 
                 PlayerGameStats(
+                    gameId = gameId,
                     gameName = matchDetailsList.first().game.name,
                     gameImageUri = matchDetailsList.first().game.imageUri,
                     matchesPlayed = totalMatches,
@@ -83,6 +97,75 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                     winProbability = winProb
                 )
             }
+        }.asLiveData()
+    }
+
+    fun getPlayerGameDetail(playerId: String, gameId: String): LiveData<PlayerGameDetailData?> {
+        return combine(
+            playerDao.getAllPlayers(),
+            gameDao.getAllGames(),
+            matchDao.getMatchesWithDetailsForPlayer(playerId)
+        ) { players, games, matches ->
+            val player = players.find { it.id == playerId } ?: return@combine null
+            val game = games.find { it.id == gameId } ?: return@combine null
+
+            val playerMatches = matches.filter { it.match.gameId == gameId }
+
+            val turnMap = mutableMapOf<Int, Int>()
+            val teamMap = mutableMapOf<String, Int>()
+            val ruleMap = mutableMapOf<String, Int>()
+            val expansionMap = mutableMapOf<String, Int>()
+
+            playerMatches.forEach { details ->
+                val matchPlayer = details.players.find { it.playerId == playerId }
+
+                matchPlayer?.turn?.let { turn ->
+                    turnMap[turn] = (turnMap[turn] ?: 0) + 1
+                }
+
+                if (!matchPlayer?.teamName.isNullOrBlank()) {
+                    val tName = matchPlayer!!.teamName!!
+                    teamMap[tName] = (teamMap[tName] ?: 0) + 1
+                }
+
+                matchPlayer?.playerRules?.forEach { rule ->
+                    if (rule.isNotBlank()) {
+                        ruleMap[rule] = (ruleMap[rule] ?: 0) + 1
+                    }
+                }
+
+                details.match.usedExpansions?.forEach { exp ->
+                    if (exp.isNotBlank()) {
+                        expansionMap[exp] = (expansionMap[exp] ?: 0) + 1
+                    }
+                }
+            }
+
+            val turnCounts = turnMap.entries
+                .sortedBy { it.key }
+                .map { "Turno ${it.key}" to it.value }
+
+            val teamCounts = teamMap.entries
+                .sortedByDescending { it.value }
+                .map { it.key to it.value }
+
+            val ruleCounts = ruleMap.entries
+                .sortedByDescending { it.value }
+                .map { it.key to it.value }
+
+            val expansionCounts = expansionMap.entries
+                .sortedByDescending { it.value }
+                .map { it.key to it.value }
+
+            PlayerGameDetailData(
+                player = player,
+                game = game,
+                matchesPlayed = playerMatches.size,
+                turnCounts = turnCounts,
+                teamCounts = teamCounts,
+                ruleCounts = ruleCounts,
+                expansionCounts = expansionCounts
+            )
         }.asLiveData()
     }
 

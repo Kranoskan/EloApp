@@ -1,6 +1,8 @@
 package com.example.myapplication.ui.home
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +18,12 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class AddMatchFragment : Fragment() {
 
@@ -24,6 +31,7 @@ class AddMatchFragment : Fragment() {
     private var matchId: String? = null
     
     private lateinit var actvSelectGame: AutoCompleteTextView
+    private lateinit var etMatchDate: TextInputEditText
     private lateinit var tvExpansionsLabel: TextView
     private lateinit var cgExpansions: ChipGroup
     private lateinit var btnSelectExpansions: Button
@@ -36,6 +44,7 @@ class AddMatchFragment : Fragment() {
     private var allPlayers: List<Player> = emptyList()
     private var selectedGame: Game? = null
     private var selectedExpansions: MutableList<String> = mutableListOf()
+    private var selectedDateTimestamp: Long = System.currentTimeMillis()
 
     companion object {
         private const val ARG_MATCH_ID = "match_id"
@@ -59,6 +68,7 @@ class AddMatchFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_add_match, container, false)
         
         actvSelectGame = view.findViewById(R.id.actvSelectGame)
+        etMatchDate = view.findViewById(R.id.etMatchDate)
         tvExpansionsLabel = view.findViewById(R.id.tvExpansionsLabel)
         cgExpansions = view.findViewById(R.id.cgExpansions)
         btnSelectExpansions = view.findViewById(R.id.btnSelectExpansions)
@@ -66,6 +76,11 @@ class AddMatchFragment : Fragment() {
         llParticipantsContainer = view.findViewById(R.id.llParticipantsContainer)
         btnAddParticipant = view.findViewById(R.id.btnAddParticipant)
         btnSaveMatch = view.findViewById(R.id.btnSaveMatch)
+
+        updateDateDisplay()
+
+        etMatchDate.setOnClickListener { showDateTimePicker() }
+        view.findViewById<View>(R.id.tilMatchDate)?.setOnClickListener { showDateTimePicker() }
 
         view.findViewById<ImageButton>(R.id.btnClose)?.setOnClickListener {
             parentFragmentManager.popBackStack()
@@ -129,8 +144,49 @@ class AddMatchFragment : Fragment() {
         }
     }
 
+    private fun updateDateDisplay() {
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        etMatchDate.setText(sdf.format(Date(selectedDateTimestamp)))
+    }
+
+    private fun showDateTimePicker() {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = selectedDateTimestamp
+        }
+
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+                TimePickerDialog(
+                    requireContext(),
+                    { _, hourOfDay, minute ->
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        calendar.set(Calendar.MINUTE, minute)
+                        calendar.set(Calendar.SECOND, 0)
+                        selectedDateTimestamp = calendar.timeInMillis
+                        updateDateDisplay()
+                    },
+                    calendar.get(Calendar.HOUR_OF_DAY),
+                    calendar.get(Calendar.MINUTE),
+                    true
+                ).show()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    }
+
     private fun loadMatchForEdit(details: MatchWithDetails) {
         val match = details.match
+        selectedDateTimestamp = match.date
+        updateDateDisplay()
+
         selectedGame = details.game
         actvSelectGame.setText(details.game.name, false)
         onGameSelected()
@@ -387,6 +443,7 @@ class AddMatchFragment : Fragment() {
         val match = Match(
             id = matchId ?: java.util.UUID.randomUUID().toString(),
             gameId = game.id,
+            date = selectedDateTimestamp,
             usedExpansions = if (selectedExpansions.isNotEmpty()) selectedExpansions.toList() else null,
             isTeamGame = swIsTeamGame.isChecked
         )

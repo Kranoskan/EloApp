@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/android:windowBackground">
@@ -10,16 +11,35 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginVertical="24dp"
-            android:text="PARTIDAS"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.2" />
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="PARTIDAS"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.2" />
+
+            <ImageButton
+                android:id="@+id/ibToggleView"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_calendar"
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="Cambiar vista"
+                android:padding="10dp"/>
+        </RelativeLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMatches"
@@ -30,6 +50,52 @@
             android:clipToPadding="false"
             android:scrollbars="none"
             android:layoutAnimation="@anim/layout_animation_fall_down"/>
+
+        <LinearLayout
+            android:id="@+id/llCalendarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/ThemeOverlay.MaterialComponents.Light" />
+
+            <TextView
+                android:id="@+id/tvSelectedDateHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                tools:text="Partidas del 15/10/2023"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurfaceVariant"/>
+
+            <TextView
+                android:id="@+id/tvNoMatchesCalendar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No hay partidas registradas en esta fecha."
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:padding="24dp"
+                android:visibility="gone"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCalendarMatches"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="12dp"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false"
+                android:scrollbars="none"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

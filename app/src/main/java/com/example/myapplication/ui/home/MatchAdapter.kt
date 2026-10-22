@@ -62,7 +62,7 @@ class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val match = matchItem.data.match
         val game = matchItem.data.game
         
-        tvMatchGame.text = "${game.name} ${matchItem.number}"
+        tvMatchGame.text = game.name
         
         val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
         tvMatchDate.text = sdf.format(Date(match.date))

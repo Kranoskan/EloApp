@@ -6,11 +6,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.util.FileUtils
 import java.util.Locale
 
-import com.example.myapplication.util.FileUtils
-
-class PlayerGameStatsAdapter : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewHolder>() {
+class PlayerGameStatsAdapter(
+    private val onGameSelected: (String) -> Unit = {}
+) : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewHolder>() {
 
     private var stats: List<PlayerGameStats> = emptyList()
 
@@ -25,7 +26,7 @@ class PlayerGameStatsAdapter : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewH
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(stats[position])
+        holder.bind(stats[position], onGameSelected)
     }
 
     override fun getItemCount(): Int = stats.size
@@ -37,7 +38,7 @@ class PlayerGameStatsAdapter : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewH
         private val tvMatches: TextView = view.findViewById(R.id.tvStatMatches)
         private val ivGameImage: android.widget.ImageView = view.findViewById(R.id.ivStatGameImage)
 
-        fun bind(stat: PlayerGameStats) {
+        fun bind(stat: PlayerGameStats, onGameSelected: (String) -> Unit) {
             tvGameName.text = stat.gameName
             tvStrength.text = "Fuerza: ${stat.strength}"
             tvWinProb.text = String.format(Locale.getDefault(), "Prob. Victoria: %.0f%%", stat.winProbability * 100)
@@ -57,6 +58,10 @@ class PlayerGameStatsAdapter : RecyclerView.Adapter<PlayerGameStatsAdapter.ViewH
                 ivGameImage.setImageResource(R.drawable.ic_games)
                 val padding = 16
                 ivGameImage.setPadding(padding, padding, padding, padding)
+            }
+
+            itemView.setOnClickListener {
+                onGameSelected(stat.gameId)
             }
         }
     }
