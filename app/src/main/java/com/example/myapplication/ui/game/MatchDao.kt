@@ -9,6 +9,10 @@ interface MatchDao {
     @Query("SELECT * FROM matches ORDER BY date DESC")
     fun getAllMatchesWithGame(): Flow<List<MatchWithGame>>
 
+    @Transaction
+    @Query("SELECT * FROM matches ORDER BY date DESC")
+    fun getAllMatchesWithDetails(): Flow<List<MatchWithDetails>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMatch(match: Match)
 
@@ -34,6 +38,9 @@ interface MatchDao {
 
     @Query("SELECT COUNT(*) FROM matches WHERE gameId = :gameId")
     fun getMatchCountForGame(gameId: String): Flow<Int>
+
+    @Query("SELECT DISTINCT mp.playerId FROM match_players mp INNER JOIN matches m ON mp.matchId = m.id WHERE m.gameId = :gameId")
+    fun getPlayerIdsForGame(gameId: String): Flow<List<String>>
 
     @Transaction
     @Query("SELECT * FROM matches WHERE id IN (SELECT matchId FROM match_players WHERE playerId = :playerId)")

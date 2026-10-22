@@ -4,29 +4,32 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CalendarView
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.ui.game.Match
 import com.example.myapplication.ui.game.MatchWithGame
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class HomeFragment : Fragment() {
     private val viewModel: MatchViewModel by activityViewModels()
     
     private lateinit var rvMatches: RecyclerView
     private lateinit var llCalendarContainer: LinearLayout
-    private lateinit var calendarView: CalendarView
-    private lateinit var cgMatchDates: ChipGroup
+    private lateinit var rvCalendarGrid: RecyclerView
+    private lateinit var calendarMonthAdapter: CalendarMonthAdapter
+    private lateinit var tvMonthYearTitle: TextView
+    private lateinit var ibPrevMonth: ImageButton
+    private lateinit var ibNextMonth: ImageButton
     private lateinit var tvSelectedDateHeader: TextView
     private lateinit var tvNoMatchesCalendar: TextView
     private lateinit var rvCalendarMatches: RecyclerView
@@ -43,6 +46,9 @@ class HomeFragment : Fragment() {
     private var selectedMonth = Calendar.getInstance().get(Calendar.MONTH)
     private var selectedDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
+    private var currentCalendarYear = selectedYear
+    private var currentCalendarMonth = selectedMonth
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -51,8 +57,10 @@ class HomeFragment : Fragment() {
         
         rvMatches = view.findViewById(R.id.rvMatches)
         llCalendarContainer = view.findViewById(R.id.llCalendarContainer)
-        calendarView = view.findViewById(R.id.calendarView)
-        cgMatchDates = view.findViewById(R.id.cgMatchDates)
+        rvCalendarGrid = view.findViewById(R.id.rvCalendarGrid)
+        tvMonthYearTitle = view.findViewById(R.id.tvMonthYearTitle)
+        ibPrevMonth = view.findViewById(R.id.ibPrevMonth)
+        ibNextMonth = view.findViewById(R.id.ibNextMonth)
         tvSelectedDateHeader = view.findViewById(R.id.tvSelectedDateHeader)
         tvNoMatchesCalendar = view.findViewById(R.id.tvNoMatchesCalendar)
         rvCalendarMatches = view.findViewById(R.id.rvCalendarMatches)
@@ -68,24 +76,49 @@ class HomeFragment : Fragment() {
         rvCalendarMatches.layoutManager = LinearLayoutManager(context)
         rvCalendarMatches.adapter = calendarMatchAdapter
 
+        calendarMonthAdapter = CalendarMonthAdapter { day ->
+            if (day.dayOfMonth > 0) {
+                selectedYear = day.year
+                selectedMonth = day.month
+                selectedDay = day.dayOfMonth
+                currentCalendarYear = day.year
+                currentCalendarMonth = day.month
+                refreshCalendarMonth()
+                updateCalendarMatches()
+            }
+        }
+
+        rvCalendarGrid.layoutManager = GridLayoutManager(context, 7)
+        rvCalendarGrid.adapter = calendarMonthAdapter
+
         ibToggleView.setOnClickListener {
             toggleViewMode()
         }
 
-        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            selectedYear = year
-            selectedMonth = month
-            selectedDay = dayOfMonth
-            updateCalendarMatches()
-            updateChipSelection()
+        ibPrevMonth.setOnClickListener {
+            currentCalendarMonth--
+            if (currentCalendarMonth < 0) {
+                currentCalendarMonth = 11
+                currentCalendarYear--
+            }
+            refreshCalendarMonth()
+        }
+
+        ibNextMonth.setOnClickListener {
+            currentCalendarMonth++
+            if (currentCalendarMonth > 11) {
+                currentCalendarMonth = 0
+                currentCalendarYear++
+            }
+            refreshCalendarMonth()
         }
 
         viewModel.matches.observe(viewLifecycleOwner) { matches ->
             allMatches = matches
             matchAdapter.updateList(matches)
             if (isCalendarMode) {
+                refreshCalendarMonth()
                 updateCalendarMatches()
-                updateMatchDateChips()
             }
         }
 
@@ -102,7 +135,9 @@ class HomeFragment : Fragment() {
             ibToggleView.setImageResource(R.drawable.ic_list)
             rvMatches.visibility = View.GONE
             llCalendarContainer.visibility = View.VISIBLE
-            updateMatchDateChips()
+            currentCalendarYear = selectedYear
+            currentCalendarMonth = selectedMonth
+            refreshCalendarMonth()
             updateCalendarMatches()
         } else {
             ibToggleView.setImageResource(R.drawable.ic_calendar)
@@ -111,48 +146,32 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun updateMatchDateChips() {
-        cgMatchDates.removeAllViews()
-        val distinctDays = allMatches.map { matchWithGame ->
-            val cal = Calendar.getInstance().apply { timeInMillis = matchWithGame.match.date }
-            Triple(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH))
-        }.distinct().sortedWith(compareBy({ it.first }, { it.second }, { it.third }))
-
-        distinctDays.forEach { (year, month, dayOfMonth) ->
-            val chip = Chip(requireContext()).apply {
-                text = String.format("%02d/%02d/%04d", dayOfMonth, month + 1, year)
-                isClickable = true
-                isCheckable = true
-                isChecked = (year == selectedYear && month == selectedMonth && dayOfMonth == selectedDay)
-                setOnClickListener {
-                    selectedYear = year
-                    selectedMonth = month
-                    selectedDay = dayOfMonth
-                    val cal = Calendar.getInstance().apply {
-                        set(year, month, dayOfMonth)
-                    }
-                    calendarView.date = cal.timeInMillis
-                    updateCalendarMatches()
-                    updateChipSelection()
-                }
-            }
-            cgMatchDates.addView(chip)
+    private fun refreshCalendarMonth() {
+        val cal = Calendar.getInstance().apply {
+            set(currentCalendarYear, currentCalendarMonth, 1)
         }
-    }
 
-    private fun updateChipSelection() {
-        for (i in 0 until cgMatchDates.childCount) {
-            val chip = cgMatchDates.getChildAt(i) as? Chip
-            chip?.let {
-                val parts = it.text.toString().split("/")
-                if (parts.size == 3) {
-                    val d = parts[0].toIntOrNull() ?: 0
-                    val m = (parts[1].toIntOrNull() ?: 1) - 1
-                    val y = parts[2].toIntOrNull() ?: 0
-                    it.isChecked = (y == selectedYear && m == selectedMonth && d == selectedDay)
-                }
-            }
+        val monthFormat = SimpleDateFormat("MMMM yyyy", Locale("es"))
+        tvMonthYearTitle.text = monthFormat.format(cal.time).replaceFirstChar { it.uppercase() }
+
+        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val firstDayOfWeek = (cal.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
+
+        val dayItems = mutableListOf<CalendarDayItem>()
+
+        repeat(firstDayOfWeek) {
+            dayItems.add(CalendarDayItem(currentCalendarYear, currentCalendarMonth, 0, false, false))
         }
+
+        for (day in 1..daysInMonth) {
+            val hasMatches = allMatches.any { matchWithGame ->
+                isSameDay(matchWithGame.match.date, currentCalendarYear, currentCalendarMonth, day)
+            }
+            val isSelected = (currentCalendarYear == selectedYear && currentCalendarMonth == selectedMonth && day == selectedDay)
+            dayItems.add(CalendarDayItem(currentCalendarYear, currentCalendarMonth, day, hasMatches, isSelected))
+        }
+
+        calendarMonthAdapter.submitList(dayItems)
     }
 
     private fun updateCalendarMatches() {

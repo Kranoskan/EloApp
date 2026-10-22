@@ -56,33 +56,75 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:paddingHorizontal="12dp">
 
-            <CalendarView
-                android:id="@+id/calendarView"
+            <!-- Month Navigation Header -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:theme="@style/ThemeOverlay.MaterialComponents.Light" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp">
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp">
+                <ImageButton
+                    android:id="@+id/ibPrevMonth"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_media_previous"
+                    app:tint="?attr/colorPrimary"
+                    android:contentDescription="Mes anterior" />
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/cgMatchDates"
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/tvMonthYearTitle"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    app:singleLine="true"/>
-            </HorizontalScrollView>
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="Octubre 2023" />
+
+                <ImageButton
+                    android:id="@+id/ibNextMonth"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_media_next"
+                    app:tint="?attr/colorPrimary"
+                    android:contentDescription="Mes siguiente" />
+            </LinearLayout>
+
+            <!-- Weekdays header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="7"
+                android:paddingBottom="4dp">
+
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="L" android:textAlignment="center" android:textStyle="bold" android:textColor="?attr/colorOnSurfaceVariant"/>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="M" android:textAlignment="center" android:textStyle="bold" android:textColor="?attr/colorOnSurfaceVariant"/>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="X" android:textAlignment="center" android:textStyle="bold" android:textColor="?attr/colorOnSurfaceVariant"/>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="J" android:textAlignment="center" android:textStyle="bold" android:textColor="?attr/colorOnSurfaceVariant"/>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="V" android:textAlignment="center" android:textStyle="bold" android:textColor="?attr/colorOnSurfaceVariant"/>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" android:textAlignment="center" android:textStyle="bold" android:textColor="?attr/colorOnSurfaceVariant"/>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="D" android:textAlignment="center" android:textStyle="bold" android:textColor="?attr/colorOnSurfaceVariant"/>
+            </LinearLayout>
+
+            <!-- Calendar Days Grid -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCalendarGrid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"/>
 
             <TextView
                 android:id="@+id/tvSelectedDateHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
                 tools:text="Partidas del 15/10/2023"
                 android:textSize="14sp"
@@ -104,7 +146,6 @@
                 android:id="@+id/rvCalendarMatches"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingHorizontal="12dp"
                 android:paddingBottom="80dp"
                 android:clipToPadding="false"
                 android:scrollbars="none"/>

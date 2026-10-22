@@ -27,14 +27,15 @@ class GamesViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getPlayerRatingsForGame(gameId: String): LiveData<List<PlayerRatingWithPlayer>> {
         return combine(
-            playerDao.getRatingsForGame(gameId),
-            playerDao.getAllPlayers()
-        ) { ratings, players ->
-            ratings.mapNotNull { rating ->
-                val player = players.find { it.id == rating.playerId }
-                if (player != null) {
-                    PlayerRatingWithPlayer(player, rating)
-                } else null
+            matchDao.getPlayerIdsForGame(gameId),
+            playerDao.getAllPlayers(),
+            playerDao.getAllRatings()
+        ) { playerIds, players, ratings ->
+            playerIds.mapNotNull { playerId ->
+                val player = players.find { it.id == playerId } ?: return@mapNotNull null
+                val rating = ratings.find { it.playerId == playerId && it.gameId == gameId }
+                    ?: PlayerRating(playerId = playerId, gameId = gameId, strength = 1200.0, matchesPlayed = 1)
+                PlayerRatingWithPlayer(player, rating)
             }.sortedByDescending { it.rating.strength }
         }.asLiveData()
     }
