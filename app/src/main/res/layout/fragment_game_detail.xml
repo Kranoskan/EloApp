@@ -208,7 +208,7 @@
                     android:paddingStart="8dp"/>
             </LinearLayout>
 
-            <!-- Sección: Jugadores -->
+            <!-- Sección: Ranking -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -219,7 +219,7 @@
                     android:id="@+id/tvPlayersHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="👤 Jugadores"
+                    android:text="🏆 Ranking"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorPrimary"

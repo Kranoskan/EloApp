@@ -64,6 +64,20 @@
                 android:layout_height="wrap_content"
                 android:theme="@style/ThemeOverlay.MaterialComponents.Light" />
 
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/cgMatchDates"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleLine="true"/>
+            </HorizontalScrollView>
+
             <TextView
                 android:id="@+id/tvSelectedDateHeader"
                 android:layout_width="match_parent"
