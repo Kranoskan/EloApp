@@ -8,6 +8,12 @@ interface PlayerDao {
     @Query("SELECT * FROM players")
     fun getAllPlayers(): Flow<List<Player>>
 
+    @Query("SELECT DISTINCT p.* FROM players p INNER JOIN match_players mp ON p.id = mp.playerId INNER JOIN matches m ON mp.matchId = m.id WHERE m.gameId = :gameId")
+    fun getPlayersForGame(gameId: String): Flow<List<Player>>
+
+    @Query("SELECT * FROM player_ratings WHERE gameId = :gameId")
+    fun getRatingsForGame(gameId: String): Flow<List<PlayerRating>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlayer(player: Player)
 

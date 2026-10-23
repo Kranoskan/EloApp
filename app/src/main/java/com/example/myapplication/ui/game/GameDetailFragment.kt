@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.myapplication.R
+import com.example.myapplication.ui.player.PlayerGameDetailFragment
 import com.example.myapplication.util.FileUtils
 
 class GameDetailFragment : Fragment() {
@@ -37,6 +38,8 @@ class GameDetailFragment : Fragment() {
     private lateinit var tvRulesHeader: TextView
     private lateinit var llExpansionsContainer: LinearLayout
     private lateinit var tvExpansionsHeader: TextView
+    private lateinit var llPlayersContainer: LinearLayout
+    private lateinit var tvPlayersHeader: TextView
 
     // Contratos de galería para cambiar la foto desde el detalle
     private val changeImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -81,6 +84,8 @@ class GameDetailFragment : Fragment() {
         tvRulesHeader = view.findViewById(R.id.tvRulesHeader)
         llExpansionsContainer = view.findViewById(R.id.llExpansionsContainer)
         tvExpansionsHeader = view.findViewById(R.id.tvExpansionsHeader)
+        llPlayersContainer = view.findViewById(R.id.llPlayersContainer)
+        tvPlayersHeader = view.findViewById(R.id.tvPlayersHeader)
 
         setupListeners(view)
 
@@ -89,6 +94,7 @@ class GameDetailFragment : Fragment() {
         }
 
         observeMatchCount()
+        observePlayers()
 
         return view
     }
@@ -96,6 +102,51 @@ class GameDetailFragment : Fragment() {
     private fun observeMatchCount() {
         viewModel.getMatchCountForGame(currentGame.id).observe(viewLifecycleOwner) { count ->
             tvTotalMatches.text = "Total Partidas: $count"
+        }
+    }
+
+    private fun observePlayers() {
+        viewModel.getPlayersWithRatingForGame(currentGame.id).observe(viewLifecycleOwner) { playersWithRating ->
+            renderPlayers(playersWithRating)
+        }
+    }
+
+    private fun renderPlayers(playersWithRating: List<PlayerWithGameRating>) {
+        tvPlayersHeader.visibility = View.VISIBLE
+        llPlayersContainer.removeAllViews()
+        val sortedList = playersWithRating.sortedByDescending { it.strength }
+        if (sortedList.isNotEmpty()) {
+            sortedList.forEachIndexed { index, (player, strength) ->
+                val rankIcon = when (index) {
+                    0 -> "🥇"
+                    1 -> "🥈"
+                    2 -> "🥉"
+                    else -> "${index + 1}º"
+                }
+                addInfoItem(
+                    container = llPlayersContainer,
+                    title = player.name,
+                    icon = rankIcon,
+                    isDeletable = false,
+                    strength = strength,
+                    showStat = true,
+                    onClick = {
+                        val fragment = PlayerGameDetailFragment.newInstance(player.id, currentGame.id)
+                        parentFragmentManager.beginTransaction()
+                            .setCustomAnimations(
+                                R.anim.slide_in_right,
+                                R.anim.slide_out_left,
+                                R.anim.slide_in_left,
+                                R.anim.slide_out_right
+                            )
+                            .replace(R.id.fragment_container, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                )
+            }
+        } else {
+            addPlaceholderItem(llPlayersContainer, "Sin jugadores registrados en este juego.")
         }
     }
 
@@ -254,7 +305,8 @@ class GameDetailFragment : Fragment() {
         isDeletable: Boolean,
         strength: Double = 0.0,
         showStat: Boolean = true,
-        onDeleted: () -> Unit
+        onClick: (() -> Unit)? = null,
+        onDeleted: () -> Unit = {}
     ) {
         val itemView = LayoutInflater.from(context).inflate(R.layout.item_detail_token, container, false)
 
@@ -288,6 +340,15 @@ class GameDetailFragment : Fragment() {
             }
         } else {
             btnDelete.visibility = View.GONE
+        }
+
+        if (onClick != null) {
+            itemView.isClickable = true
+            itemView.isFocusable = true
+            val typedArray = context?.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
+            itemView.foreground = typedArray?.getDrawable(0)
+            typedArray?.recycle()
+            itemView.setOnClickListener { onClick() }
         }
 
         container.addView(itemView)

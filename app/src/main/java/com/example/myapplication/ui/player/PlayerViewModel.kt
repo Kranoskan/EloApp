@@ -7,6 +7,8 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.ui.game.AppDatabase
+import com.example.myapplication.ui.game.AttributeRating
+import com.example.myapplication.ui.game.EloCalculator
 import com.example.myapplication.ui.game.Game
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -27,7 +29,8 @@ data class PlayerGameDetailData(
     val turnCounts: List<Pair<String, Int>>,
     val teamCounts: List<Pair<String, Int>>,
     val ruleCounts: List<Pair<String, Int>>,
-    val expansionCounts: List<Pair<String, Int>>
+    val expansionCounts: List<Pair<String, Int>>,
+    val strengthHistory: List<Pair<Int, Double>> = emptyList()
 )
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
@@ -104,12 +107,18 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         return combine(
             playerDao.getAllPlayers(),
             gameDao.getAllGames(),
-            matchDao.getMatchesWithDetailsForPlayer(playerId)
-        ) { players, games, matches ->
+            matchDao.getAllMatchesWithDetails()
+        ) { players, games, allMatches ->
             val player = players.find { it.id == playerId } ?: return@combine null
             val game = games.find { it.id == gameId } ?: return@combine null
 
-            val playerMatches = matches.filter { it.match.gameId == gameId }
+            val gameMatchesAsc = allMatches
+                .filter { it.match.gameId == gameId }
+                .sortedBy { it.match.date }
+
+            val playerMatches = gameMatchesAsc.filter { details ->
+                details.players.any { it.playerId == playerId }
+            }
 
             val turnMap = mutableMapOf<Int, Int>()
             val teamMap = mutableMapOf<String, Int>()
@@ -157,6 +166,44 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                 .sortedByDescending { it.value }
                 .map { it.key to it.value }
 
+            val playerRatingsMap = mutableMapOf<String, PlayerRating>()
+            val attributeRatingsMap = mutableMapOf<String, AttributeRating>()
+            val playerMatchCountMap = mutableMapOf<String, Int>()
+
+            val strengthHistory = mutableListOf<Pair<Int, Double>>()
+
+            for (matchDetails in gameMatchesAsc) {
+                val matchPlayers = matchDetails.players
+                val matchTeams = matchDetails.teams
+
+                val currentRelevantPlayerRatings = matchPlayers.associate { mp ->
+                    mp.playerId to (playerRatingsMap[mp.playerId] ?: PlayerRating(playerId = mp.playerId, gameId = gameId))
+                }
+
+                val currentRelevantAttributeRatings = mutableMapOf<String, AttributeRating>()
+
+                val (updatedPlayerRatings, updatedAttributeRatings) = EloCalculator.calculateEloChanges(
+                    game,
+                    matchTeams,
+                    matchPlayers,
+                    currentRelevantPlayerRatings,
+                    currentRelevantAttributeRatings
+                )
+
+                updatedPlayerRatings.forEach { rating ->
+                    playerRatingsMap[rating.playerId] = rating
+                    val count = (playerMatchCountMap[rating.playerId] ?: 0) + 1
+                    playerMatchCountMap[rating.playerId] = count
+                    if (rating.playerId == playerId) {
+                        strengthHistory.add(Pair(count, rating.strength))
+                    }
+                }
+
+                updatedAttributeRatings.forEach { attr ->
+                    attributeRatingsMap[attr.id] = attr
+                }
+            }
+
             PlayerGameDetailData(
                 player = player,
                 game = game,
@@ -164,7 +211,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                 turnCounts = turnCounts,
                 teamCounts = teamCounts,
                 ruleCounts = ruleCounts,
-                expansionCounts = expansionCounts
+                expansionCounts = expansionCounts,
+                strengthHistory = strengthHistory
             )
         }.asLiveData()
     }
